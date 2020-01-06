@@ -1,4 +1,7 @@
+const Command = require("./commands");
 const Discord = require("discord.js");
+
+require("dotenv").config();
 
 const client = new Discord.Client();
 var prefix = ",";
@@ -15,29 +18,8 @@ client.on('message', msg => {
     // Check that the right prefix is used.
     if(!msg.content.startsWith(prefix)) return;
 
-    let list_variables = msg.content.toLowerCase().slice(prefix.length).split(' ');
-
-    // Send a ping message.
-    if(list_variables[0] === 'ping'){
-
-        // Obtain time the user sent the message.
-        timeSent = msg.createdTimestamp;
-        msg.channel.send('Pong!').then(
-            // Attempt to edit the message by adding the time.
-            sent => {
-
-                // Otain time stamp between user message and bot message.
-                var timePing = sent.createdTimestamp;
-                var ping = timePing - timeSent;
-                ping = String(ping);
-
-                // Add ping message.
-                sent.edit('Pong! `' + ping + 'ms`');
-            }
-        );
-        
-    }
+    Command.processCommand(msg, prefix, client);
 });
 
 
-client.login(BOT_TOKEN);
+client.login(process.env.BOT_TOKEN);
