@@ -2,7 +2,7 @@
   "name": "log-bot",
   "version": "1.0.0",
   "description": "A logging discord bot.",
-  "main": "main.js",
+  "main": "src/main.js",
   "dependencies": {
     "discord.js": "^11.5.1",
     "dotenv": "^8.2.0"
@@ -10,7 +10,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"No tests made\" && exit 1",
-    "start": "node main.js"
+    "start": "node src/main.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
     "Discord",
     "Bot"
   ],
-  "author": "",
+  "author": "DragonMeme",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/DragonMeme/log-bot/issues"
