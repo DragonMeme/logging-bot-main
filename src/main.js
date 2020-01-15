@@ -4,11 +4,12 @@ const Discord = require("discord.js");
 require("dotenv").config();
 
 const client = new Discord.Client();
-var prefix = ",";
+var prefix = process.env.PREFIX;
 
 client.on('ready', () => {
     console.log('Logged in as ' + client.user.tag + '!');
     client.user.setStatus('available');
+    client.user.setActivity("type " + prefix + "help",  "PLAYING");
 });
 
 client.on('message', msg => {
@@ -22,4 +23,4 @@ client.on('message', msg => {
 });
 
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN).catch(error => console.log(error));

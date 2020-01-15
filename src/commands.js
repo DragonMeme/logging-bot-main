@@ -23,6 +23,9 @@ exports.processCommand = function(msg, prefix, client){
     
 };
 
+/*
+    COMMANDS EVERYONE CAN USE
+*/
 function ping(msg){
     // Obtain time the user sent the message.
     var timeSent = msg.createdTimestamp;
@@ -42,7 +45,8 @@ function ping(msg){
 
 function shutdown(msg, client){
     // Send a message before shutting down.
-    msg.channel.send("Shutting down!").then(
-        client.destroy()
-    );
+    msg.channel.send("Shutting down!").then(() => {
+        console.log("Shutting down!");
+        client.destroy();
+    });
 }
