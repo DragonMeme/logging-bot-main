@@ -5,11 +5,15 @@
   "main": "src/main.js",
   "dependencies": {
     "discord.js": "^11.5.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "better-sqlite3": "^5.4.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^7.0.0",
+    "chai": "^4.2.0"
+  },
   "scripts": {
-    "test": "echo \"No tests made\" && exit 1",
+    "test": "mocha src/main.test.js --exit",
     "start": "node src/main.js"
   },
   "repository": {

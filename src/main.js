@@ -1,4 +1,5 @@
 const Command = require("./commands");
+const Database = require("./database")
 const Discord = require("discord.js");
 
 require("dotenv").config();
@@ -7,9 +8,16 @@ const client = new Discord.Client();
 var prefix = process.env.PREFIX;
 
 client.on('ready', () => {
-    console.log('Logged in as ' + client.user.tag + '!');
+    client.user.setStatus('dnd');
+    client.user.setActivity("Loading...",  "PLAYING");
+    console.log('Loading bot!')
+
+    Database.initDB(client);
+
     client.user.setStatus('available');
     client.user.setActivity("type " + prefix + "help",  "PLAYING");
+
+    console.log('Logged in as ' + client.user.tag + '!');
 });
 
 client.on('message', msg => {
