@@ -46,7 +46,7 @@ function ping(msg){
 function shutdown(msg, client){
     // Send a message before shutting down.
     msg.channel.send("Shutting down!").then(() => {
-        console.log("Shutting down!");
+        console.log("\nShutting down!");
         client.destroy();
     });
 }
