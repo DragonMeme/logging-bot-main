@@ -1,5 +1,5 @@
 const Command = require("./commands");
-const Database = require("./database")
+const Database = require("./database");
 const Discord = require("discord.js");
 
 require("dotenv").config();

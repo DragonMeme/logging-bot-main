@@ -4,9 +4,9 @@
   "description": "A logging discord bot.",
   "main": "src/main.js",
   "dependencies": {
+    "better-sqlite3": "^5.4.3",
     "discord.js": "^11.5.1",
-    "dotenv": "^8.2.0",
-    "better-sqlite3": "^5.4.3"
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "mocha": "^7.0.0",
