@@ -1,4 +1,5 @@
 .git
 README.md
 node_modules
+data
 npm-debug.log

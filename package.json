@@ -13,7 +13,7 @@
     "chai": "^4.2.0"
   },
   "scripts": {
-    "test": "mocha src/main.test.js --exit",
+    "test": "mocha src/main.test.js --exit --timeout 10000",
     "start": "node src/main.js"
   },
   "repository": {

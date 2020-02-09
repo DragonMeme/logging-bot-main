@@ -7,7 +7,7 @@ exports.initDB = function(client){
     var guild_to_add = [];
  
     client.guilds.forEach(guild => {
-        let guild_id = String(guild.id);
+        let guild_id = guild.id;
         list_guild_id.push(guild_id);
     });
 

@@ -1,36 +1,37 @@
+const Main_Table = require('./main_table');
 const Sqlite3 = require('better-sqlite3');
-const fs = require('fs');
 
-module.exports = class Guild_Settings_Table{
-    /*
-        This constructor does the following:
-        - Create data folder directory if not exists.
-        - Create table if table does not exist.
-        - Takes control of the table of given table name.
-        - (OPTIONAL) Prints human readable debug logs.
-    */
+/*
+    The class stores rules as to which channel to post logs at.
+*/
+module.exports = class Guild_Settings_Table extends Main_Table{
+    
     constructor(table_name, debug){
-        this.debug = debug;
-        this.table_name = table_name;
-        const dir = "./data";
-
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir);
-            if(this.debug) console.log("Creating data directory for database.");
-        }
-
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null});
+        super(table_name, debug);
 
         let sql = "CREATE TABLE IF NOT EXISTS " ;
         sql += this.table_name + "(";
         sql += "guild_id TEXT UNIQUE NOT NULL, ";
-        sql += "mod_channel TEXT, ";
-        sql += "admin_channel TEXT)";
 
-        db.prepare(sql).run();
-        db.close();
+        // User activity.
+        sql += "user_joins TEXT, ";
+        sql += "user_leaves TEXT, ";
+        sql += "user_msg_deletes TEXT, ";
+        sql += "user_msg_edits TEXT, ";
+        sql += "user_nick_changes TEXT, ";
+        sql += "user_role_assigns TEXT, ";
 
-        if(this.debug) console.log("Table found/created.");
+        // Channel activity.
+        sql += "bulk_delete TEXT, ";
+        sql += "vc_joins TEXT, ";
+        sql += "vc_leaves TEXT, ";
+
+        // Moderator activity.
+        sql += "user_kicked TEXT, ";
+        sql += "user_muted TEXT, ";
+        sql += "muted_role TEXT)";
+
+        this.initTable(sql);
     }
 
     // Adds a list of guilds to the database.
@@ -50,7 +51,9 @@ module.exports = class Guild_Settings_Table{
         db.close();
     }
 
-    // Read and return any ID present. The channel must be either "MOD" or "ADMIN", otherwise returns guild_id.
+    /*
+        Read and return any ID present. 
+    */
     readGuild(guild, channel){
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         let sql = "SELECT *";
@@ -66,52 +69,111 @@ module.exports = class Guild_Settings_Table{
         if(!info) return null;
         
         switch(channel){
-            case "MOD":
-                return info.mod_channel;
-            case "ADMIN":
-                return info.admin_channel;
+            case "UJ":
+                return info.user_joins;
+
+            case "UL":
+                return info.user_leaves;
+
+            case "UMD":
+                return info.user_msg_deletes;
+
+            case "UME":
+                return info.user_msg_edits;
+
+            case "UNC":
+                return info.user_nick_changes;
+
+            case "URA":
+                return info.user_role_assigns;
+
+            case "BD":
+                return info.bulk_delete;
+
+            case "VJ":
+                return info.vc_joins;
+
+            case "VL":
+                return info.vc_leaves;
+
+            case "UK":
+                return info.user_kicked;
+
+            case "UM":
+                return info.user_muted;
+
+            case "MR":
+                return info.muted_role;
+
             default:
                 return info.guild_id;
         }
     }
 
-    // Return all values present in database.
-    readAllGuild(){
+    updateGuild(guild, info, channel){
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+        let sql = "UPDATE " + this.table_name +" SET ";
+        var channel_type;
 
-        const sql = "SELECT * FROM " + this.table_name;
+        switch(channel){
+            case "UJ":
+                channel_type = "user_joins";
+                break;
 
-        let list_db_guilds = db.prepare(sql).all();
+            case "UL":
+                channel_type = "user_leaves";
+                break;
+
+            case "UMD":
+                channel_type = "user_msg_deletes";
+                break;
+
+            case "UME":
+                channel_type = "user_msg_edits";
+                break;
+
+            case "UNC":
+                channel_type = "user_nick_changes";
+                break;
+
+            case "URA":
+                channel_type = "user_role_assigns";
+                break;
+
+            case "BD":
+                channel_type = "bulk_delete";
+                break;
+
+            case "VJ":
+                channel_type = "vc_joins";
+                break;
+
+            case "VL":
+                channel_type = "vc_leaves";
+                break;
+
+            case "UK":
+                channel_type = "user_kicked";
+                break;
+
+            case "UM":
+                channel_type = "user_muted";
+                break;
+
+            case "MR":
+                channel_type = "muted_role";
+                break;
+
+            default:
+                return;
+        }
+        sql += channel_type + " = ? WHERE guild_id = ?";
+
+        db.prepare(sql).run(info, guild);
         db.close();
 
-        return list_db_guilds;
-    }
-
-    // Update any channel ID present. The channel must be either "MOD" or "ADMIN"
-    updateGuild(guild, info, channel){
-        
-        if(channel === "MOD" || channel === "ADMIN"){
-            let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
-            let sql = "UPDATE " + this.table_name +" SET ";
-
-            switch(channel){
-                case "MOD":
-                    var channel_type = "mod_channel";
-                    break;
-                case "ADMIN":
-                    var channel_type = "admin_channel";
-                    break;
-            }
-            sql += channel_type + " = ? WHERE guild_id = ?";
-
-            db.prepare(sql).run(info, guild);
-            db.close();
-
-            if(this.debug) {
-                console.log("Updated " + channel_type + " to guild_id" + guild);
-            }
-        }else{
-            return;
+        if(this.debug) {
+            console.log("Updated " + channel_type + " to guild_id" + guild);
         }
     }
 
@@ -130,17 +192,5 @@ module.exports = class Guild_Settings_Table{
         })
 
         db.close();
-    }
-
-    // Deletes the table.
-    deleteAllGuild(){
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
-
-        let sql = "DROP TABLE IF EXISTS " + this.table_name;
-
-        db.prepare(sql).run();
-        db.close();
-
-        delete this;
     }
 }
