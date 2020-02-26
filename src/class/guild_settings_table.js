@@ -2,7 +2,7 @@ const Main_Table = require('./main_table');
 const Sqlite3 = require('better-sqlite3');
 
 /*
-    The class stores rules as to which channel to post logs at.
+    The class stores rules as to which setting to post logs at.
 */
 module.exports = class Guild_Settings_Table extends Main_Table{
     
@@ -54,7 +54,7 @@ module.exports = class Guild_Settings_Table extends Main_Table{
     /*
         Read and return any ID present. 
     */
-    readGuild(guild, channel){
+    readGuild(guild, setting){
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         let sql = "SELECT *";
         sql += " FROM " + this.table_name;
@@ -68,7 +68,7 @@ module.exports = class Guild_Settings_Table extends Main_Table{
 
         if(!info) return null;
         
-        switch(channel){
+        switch(setting){
             case "UJ":
                 return info.user_joins;
 
@@ -110,70 +110,70 @@ module.exports = class Guild_Settings_Table extends Main_Table{
         }
     }
 
-    updateGuild(guild, info, channel){
+    updateGuild(guild, info, setting){
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         let sql = "UPDATE " + this.table_name +" SET ";
-        var channel_type;
+        var setting_type;
 
-        switch(channel){
+        switch(setting){
             case "UJ":
-                channel_type = "user_joins";
+                setting_type = "user_joins";
                 break;
 
             case "UL":
-                channel_type = "user_leaves";
+                setting_type = "user_leaves";
                 break;
 
             case "UMD":
-                channel_type = "user_msg_deletes";
+                setting_type = "user_msg_deletes";
                 break;
 
             case "UME":
-                channel_type = "user_msg_edits";
+                setting_type = "user_msg_edits";
                 break;
 
             case "UNC":
-                channel_type = "user_nick_changes";
+                setting_type = "user_nick_changes";
                 break;
 
             case "URA":
-                channel_type = "user_role_assigns";
+                setting_type = "user_role_assigns";
                 break;
 
             case "BD":
-                channel_type = "bulk_delete";
+                setting_type = "bulk_delete";
                 break;
 
             case "VJ":
-                channel_type = "vc_joins";
+                setting_type = "vc_joins";
                 break;
 
             case "VL":
-                channel_type = "vc_leaves";
+                setting_type = "vc_leaves";
                 break;
 
             case "UK":
-                channel_type = "user_kicked";
+                setting_type = "user_kicked";
                 break;
 
             case "UM":
-                channel_type = "user_muted";
+                setting_type = "user_muted";
                 break;
 
             case "MR":
-                channel_type = "muted_role";
+                setting_type = "muted_role";
                 break;
 
             default:
                 return;
         }
-        sql += channel_type + " = ? WHERE guild_id = ?";
+        sql += setting_type + " = ? WHERE guild_id = ?";
 
         db.prepare(sql).run(info, guild);
         db.close();
 
         if(this.debug) {
-            console.log("Updated " + channel_type + " to guild_id" + guild);
+            console.log("Updated " + setting_type + " to guild_id" + guild);
         }
     }
 

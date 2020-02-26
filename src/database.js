@@ -78,12 +78,12 @@ exports.createGuild = function(list_guild){
     g_setting.createGuild(list_guild);
 };
 
-exports.readGuild = function(guild, channel){
-    return g_setting.readGuild(guild, channel);
+exports.readGuild = function(guild, setting){
+    return g_setting.readGuild(guild, setting);
 };
 
-exports.updateGuild = function(guild, info, channel){
-    g_setting.updateGuild(guild, info, channel);
+exports.updateGuild = function(guild, info, setting){
+    g_setting.updateGuild(guild, info, setting);
 };
 
 exports.deleteGuild = function(list_guild){
