@@ -1,4 +1,4 @@
-const Guild_Setting = require('./class/guild_settings_table.js');
+const Guild_Setting = require("./class/guild_settings_table.js");
 
 var g_setting;
 
@@ -13,7 +13,7 @@ exports.initDB = function(client){
 
     // Since this is an initialising command, time is not an issue.
     console.log("\nAttempting to create table if it does not exist.");
-    g_setting = new Guild_Setting("server_settings", false);
+    g_setting = new Guild_Setting("server_settings", true);
 
     // Check that the guild is already added to database.
     console.log("\nLooking for missing servers to add to database.");
@@ -63,7 +63,7 @@ function searchMissingGuildServerSettingsDB(list_guild){
         let row = g_setting.readGuild(guild, "G");
         if(row == null){
             added_items.push(guild);
-            console.log("Guild ID: " + guild + " not in database.");
+            console.log(`Guild ID: ${guild} not in database.`);
         }
     });
 

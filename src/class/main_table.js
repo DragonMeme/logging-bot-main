@@ -1,5 +1,5 @@
-const Sqlite3 = require('better-sqlite3');
-const fs = require('fs');
+const Sqlite3 = require("better-sqlite3");
+const fs = require("fs");
 
 // Template class for constructing sql functionality.
 module.exports = class Main_Table{
@@ -16,7 +16,7 @@ module.exports = class Main_Table{
 
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir);
-            if(this.debug) console.log("Creating data directory for database.");
+            if(this.debug) console.log(`Creating data directory for database.`);
         }
     }
 
@@ -26,14 +26,14 @@ module.exports = class Main_Table{
         db.prepare(sql).run();
         db.close();
 
-        if(this.debug) console.log("Table found/created.");
+        if(this.debug) console.log(`Table ${this.table_name} found/created.`);
     }
 
     // Return all values present in database.
     readAllGuild(){
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
 
-        const sql = "SELECT * FROM " + this.table_name;
+        const sql = `SELECT * FROM ${this.table_name}`;
 
         let list_db_guilds = db.prepare(sql).all();
         db.close();
@@ -43,14 +43,14 @@ module.exports = class Main_Table{
 
     // Deletes the table.
     deleteAllGuild(){
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
-
         // Drop the indexing table.
-        let sql = "DROP INDEX IF EXISTS index_" + this.table_name;
+        let sql = `DROP INDEX IF EXISTS index_${this.table_name}`;
+
+        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         db.prepare(sql).run();
 
         // Drop the entire table.
-        sql = "DROP TABLE IF EXISTS " + this.table_name;
+        sql = `DROP TABLE IF EXISTS ${this.table_name}`;
         db.prepare(sql).run();
 
         db.close();

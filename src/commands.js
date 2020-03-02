@@ -1,7 +1,7 @@
 const Database = require("./database");
 
 exports.processCommand = function(msg, prefix, client){
-    let list_variables = msg.content.toLowerCase().slice(prefix.length).split(' ');
+    let list_variables = msg.content.toLowerCase().slice(prefix.length).split(" ");
 
     /*
         Practically most commonly executed commands appears on top first.
@@ -13,7 +13,7 @@ exports.processCommand = function(msg, prefix, client){
         case "ping":
             // Obtain time the user sent the message.
             var timeSent = msg.createdTimestamp;
-            msg.channel.send('Pong!').then(
+            msg.channel.send("Pong!").then(
                 // Attempt to edit the message by adding the time.
                 sent => {
 
@@ -22,7 +22,7 @@ exports.processCommand = function(msg, prefix, client){
                     var ping = timePing - timeSent;
 
                     // Add ping message.
-                    sent.edit('Pong! `' + String(ping) + 'ms`');
+                    sent.edit(`Pong! \`${String(ping)}ms\``);
                 }
             );
             break;
@@ -38,6 +38,30 @@ exports.processCommand = function(msg, prefix, client){
         // Only an administrator may use these commands.
         if(hasAdminPermissions(msg)){
             switch(list_variables[0]){
+                case "statuslog":
+                    let message_string = "Current channels for logging of specific activity:\n";
+                    message_string += "__**User Activities:**__\n";
+                    message_string += `User Joins: ${Database.readGuild(msg.guild.id, "UJ")}\n`;
+                    message_string += `User Leaves: ${Database.readGuild(msg.guild.id, "UL")}\n`;
+                    message_string += `User Message Deletes: ${Database.readGuild(msg.guild.id, "UMD")}\n`;
+                    message_string += `User Message Edits: ${Database.readGuild(msg.guild.id, "UME")}\n`;
+                    message_string += `User Nickname Changes: ${Database.readGuild(msg.guild.id, "UNC")}\n`;
+                    message_string += `User Role Assigns: ${Database.readGuild(msg.guild.id, "URA")}\n\n`;
+
+                    message_string += "__**Channel Activities:**__\n";
+                    message_string += `Bulk Delete: ${Database.readGuild(msg.guild.id, "BD")}\n`;
+                    message_string += `Voice Chat Joins: ${Database.readGuild(msg.guild.id, "VJ")}\n`;
+                    message_string += `Voice Chat Leaves: ${Database.readGuild(msg.guild.id, "VL")}\n\n`;
+
+                    message_string += "__**Moderator Activities:**__\n";
+                    message_string += `User Kicked: ${Database.readGuild(msg.guild.id, "UK")}\n`;
+                    message_string += `User Muted: ${Database.readGuild(msg.guild.id, "UM")}\n\n`;
+
+                    message_string += "__**Roles Set:**__\n";
+                    message_string += `Muted Role: ${Database.readGuild(msg.guild.id, "MR")}\n`;
+
+                    msg.channel.send(message_string)
+                    break;
                 default:
                     break;
             }

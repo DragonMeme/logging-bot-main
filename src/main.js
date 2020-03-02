@@ -5,22 +5,23 @@ const Discord = require("discord.js");
 require("dotenv").config();
 
 const client = new Discord.Client();
-var prefix = process.env.PREFIX;
+const prefix = process.env.PREFIX;
+const author = process.env.AUTHOR_ID
 
-client.on('ready', async () => {
-    client.user.setStatus('dnd');
+client.on("ready", async () => {
+    client.user.setStatus("dnd");
     client.user.setActivity("Loading...",  "PLAYING");
-    console.log('Loading bot!')
+    console.log("Loading bot!")
 
     Database.initDB(client);
 
-    client.user.setStatus('available');
-    client.user.setActivity("type " + prefix + "help",  "PLAYING");
+    client.user.setStatus("available");
+    client.user.setActivity(`type ${prefix}help`,  "PLAYING");
 
-    console.log('\nLogged in as ' + client.user.tag + '!');
+    console.log(`\nLogged in as ${client.user.tag}!`);
 });
 
-client.on('message', async (msg) => {
+client.on("message", async (msg) => {
     // Do not reply to any bot so avoid spam.
     if(msg.author.bot) return;
 
@@ -28,25 +29,25 @@ client.on('message', async (msg) => {
     if(!msg.content.startsWith(prefix)) return;
 
     // Assure that bot does not respond to commands until startup is done. 
-    if(client.user.presence.status != 'online') {
+    if(client.user.presence.status != "online") {
 
         // The bot owner is the only exception.
-        if(msg.author.id != process.env.AUTHOR_ID) return;
+        if(msg.author.id != author) return;
     }
 
     Command.processCommand(msg, prefix, client);
 });
 
-client.on('guildCreate', async (guild) => {
+client.on("guildCreate", async (guild) => {
     let guild_id = guild.id;
 
-    console.log("\nGuild_id: " + guild_id + " attempted to add bot to server.");
+    console.log(`\nGuild_id: ${guild_id} attempted to add bot to server.`);
 
     // The bot that is invited to a guild must have more than 50 members.
-    if(guild.members.filter(member => !member.bot).size < 50){
+    if(guild.members.filter(member => !member.user.bot).size < 50){
 
         // Only exception is when the server is owned by the author.
-        if(guild.ownerID != process.env.AUTHOR_ID){
+        if(guild.ownerID != author){
             guild.leave();
 
             // Do not perform any SQL Query for this.
@@ -54,22 +55,22 @@ client.on('guildCreate', async (guild) => {
         }
     }
 
-    console.log("\nAdding guild_id: " + guild_id + " to database.");
+    console.log(`\nAdding guild_id: ${guild_id} to database.`);
     Database.createGuild([guild_id]);
 });
 
-client.on('guildDelete', async (guild) => {
+client.on("guildDelete", async (guild) => {
     let guild_id = guild.id;
 
     if(guild.members.filter(member => !member.bot).size < 50){
 
         // Ensure that when the bot auto leaves, do not perform SQL Query.
-        if(guild.ownerID != process.env.AUTHOR_ID){
+        if(guild.ownerID != author){
             return;
         }
     }
 
-    console.log("\nRemoving guild_id: " + guild_id + " from database.");
+    console.log(`\nRemoving guild_id: ${guild_id} from database.`);
     Database.deleteGuild([guild_id]);
 });
 
