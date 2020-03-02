@@ -4,12 +4,17 @@
   "description": "A logging discord bot.",
   "main": "src/main.js",
   "dependencies": {
+
+    "better-sqlite3": "^5.4.3",
     "discord.js": "^11.5.1",
     "dotenv": "^8.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^7.0.0",
+    "chai": "^4.2.0"
+  },
   "scripts": {
-    "test": "echo \"No tests made\" && exit 1",
+    "test": "mocha src/main.test.js --exit --timeout 10000",
     "start": "node src/main.js"
   },
   "repository": {
