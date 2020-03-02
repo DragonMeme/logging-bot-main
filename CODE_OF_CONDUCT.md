@@ -70,4 +70,4 @@ Reason: Strings closed with backticks has a nice feature that allows putting a v
 
 3.) Only code that has the required intended functionality completed may be pushed in to the intended repository.
 
-Users may only push working code to a non-default branch. Changes to master branch should only happen when the branch has optimized code and ready to be merged in to by another branch.
+Users may only push working code to a non-default branch. Changes of code to the master branch should only happen when the requested branch has the optimized and working code and ready to be merged in to master.
