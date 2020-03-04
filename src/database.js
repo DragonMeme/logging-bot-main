@@ -1,19 +1,34 @@
-const Guild_Setting = require("./class/guild_settings_table.js");
+Guild_Setting_Table = require("./class/guild_settings_table.js");
+Guild_Setting_Common = require("./common/guild_setting.js");
 
-var g_setting;
+require("dotenv").config();
+
+const author = String(process.env.AUTHOR_ID);
+const g_setting = new Guild_Setting_Table("Server Settings", true);
 
 exports.initDB = function(client){
-    var list_guild_id = [];
-    var guild_to_add = [];
+    let list_guild_id = [];
+    let guild_to_add = [];
  
+    // Ensure to only add guilds that meet the pre-requisites.
     client.guilds.forEach(guild => {
         let guild_id = guild.id;
-        list_guild_id.push(guild_id);
-    });
 
-    // Since this is an initialising command, time is not an issue.
-    console.log("\nAttempting to create table if it does not exist.");
-    g_setting = new Guild_Setting("server_settings", true);
+        // Leave any guild that does not meet the pre-requirements.
+        if(guild.members.filter(member => !member.user.bot).size < 50){
+
+            // The bot author is the only exception.
+            if(guild.ownerID == author){
+                list_guild_id.push(guild_id);
+            }else{
+                guild.leave();
+            }
+
+        }else{
+            list_guild_id.push(guild_id);
+        }
+        
+    });
 
     // Check that the guild is already added to database.
     console.log("\nLooking for missing servers to add to database.");
@@ -37,17 +52,8 @@ function pruneServerSettingsDB(updated_list){
     list_db_guilds = g_setting.readAllGuild();
 
     list_db_guilds.forEach(guild => {
-        let hasGuild = false;
-
-        for(i = 0; i < updated_list.length; i++){
-            if(guild.guild_id === updated_list[i]) {
-                hasGuild = true;
-                break;
-            }
-        }
-        if(!hasGuild) {
-            g_setting.deleteGuild([guild.guild_id]);
-        }
+        let guild_id  = guild[`${Guild_Setting_Common.select_settings("G")}`];
+        if(!updated_list.includes(guild_id)) g_setting.deleteGuild([guild_id]);
     });
     console.log("Servers successfully removed.");
 }
@@ -63,7 +69,7 @@ function searchMissingGuildServerSettingsDB(list_guild){
         let row = g_setting.readGuild(guild, "G");
         if(row == null){
             added_items.push(guild);
-            console.log(`Guild ID: ${guild} not in database.`);
+            console.log(`${Guild_Setting_Common.select_settings("G")} ${guild} not in database.`);
         }
     });
 

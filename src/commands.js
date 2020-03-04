@@ -1,10 +1,17 @@
-const Database = require("./database");
+const Database = require("./database.js");
+const Guild_Setting = require("./common/guild_setting.js");
 
-exports.processCommand = function(msg, prefix, client){
-    let list_variables = msg.content.toLowerCase().slice(prefix.length).split(" ");
+require("dotenv").config();
+
+const author = String(process.env.AUTHOR_ID);
+const prefix = process.env.PREFIX;
+
+exports.processCommand = function(msg, client){
+    const list_variables = msg.content.toLowerCase().slice(prefix.length).split(" ");
+    console.log(`\n${String(list_variables)}`);
 
     /*
-        Practically most commonly executed commands appears on top first.
+        In practical most commonly executed commands appears on top first.
         So checks in order of most likely commonly used commands.
     */
 
@@ -39,28 +46,43 @@ exports.processCommand = function(msg, prefix, client){
         if(hasAdminPermissions(msg)){
             switch(list_variables[0]){
                 case "statuslog":
-                    let message_string = "Current channels for logging of specific activity:\n";
-                    message_string += "__**User Activities:**__\n";
-                    message_string += `User Joins: ${Database.readGuild(msg.guild.id, "UJ")}\n`;
-                    message_string += `User Leaves: ${Database.readGuild(msg.guild.id, "UL")}\n`;
-                    message_string += `User Message Deletes: ${Database.readGuild(msg.guild.id, "UMD")}\n`;
-                    message_string += `User Message Edits: ${Database.readGuild(msg.guild.id, "UME")}\n`;
-                    message_string += `User Nickname Changes: ${Database.readGuild(msg.guild.id, "UNC")}\n`;
-                    message_string += `User Role Assigns: ${Database.readGuild(msg.guild.id, "URA")}\n\n`;
+                    const guild_id = msg.guild.id;
+                    const valid_option = ["all", "user", "channel", "mod", "role"];
 
-                    message_string += "__**Channel Activities:**__\n";
-                    message_string += `Bulk Delete: ${Database.readGuild(msg.guild.id, "BD")}\n`;
-                    message_string += `Voice Chat Joins: ${Database.readGuild(msg.guild.id, "VJ")}\n`;
-                    message_string += `Voice Chat Leaves: ${Database.readGuild(msg.guild.id, "VL")}\n\n`;
+                    // In case there is no second argument "all" is used by default.
+                    const default_option = !list_variables[1] ? valid_option[0] : null;
+                    const usable_option = valid_option.includes(list_variables[1]);
+                    const current_option = usable_option ? list_variables[1]: default_option;
 
-                    message_string += "__**Moderator Activities:**__\n";
-                    message_string += `User Kicked: ${Database.readGuild(msg.guild.id, "UK")}\n`;
-                    message_string += `User Muted: ${Database.readGuild(msg.guild.id, "UM")}\n\n`;
+                    switch(current_option){
+                        // all
+                        case valid_option[0]:
+                            msg.channel.send(printStatusLog(12, 0, guild_id));
+                            return;
 
-                    message_string += "__**Roles Set:**__\n";
-                    message_string += `Muted Role: ${Database.readGuild(msg.guild.id, "MR")}\n`;
+                        // user
+                        case valid_option[1]:
+                            msg.channel.send(printStatusLog(6, 0, guild_id));
+                            return;
 
-                    msg.channel.send(message_string)
+                        // channel
+                        case valid_option[2]:
+                            msg.channel.send(printStatusLog(9, 6, guild_id));
+                            return;
+
+                        // mod
+                        case valid_option[3]:
+                            msg.channel.send(printStatusLog(11, 9, guild_id));
+                            return;
+
+                        // role
+                        case valid_option[4]:
+                            msg.channel.send(printStatusLog(12, 11, guild_id));
+                            return;
+                        default:
+                            msg.channel.send(`Invalid second argument \`${list_variables[1]}\`.`)
+                            return;
+                    }
                     break;
                 default:
                     break;
@@ -69,7 +91,7 @@ exports.processCommand = function(msg, prefix, client){
     }
 
     // Commands only the bot owner can use.
-    if(msg.author.id === process.env.AUTHOR_ID){
+    if(msg.author.id === author){
         // These commands only apply to bot author
         switch(list_variables[0]){
             case "shutdown":
@@ -114,4 +136,31 @@ function hasAdminPermissions(msg){
     if(member.hasPermission(0x10000000)) permissionLevel++; // Manage Roles
 
     return permissionLevel > 2;
+}
+
+function printStatusLog(maximum, minimum, guild_id){
+    let message_string = "Current channels for logging of specific activity:";
+    for(let i = minimum; i < maximum; i++){
+        switch(i){
+            case 0:
+                message_string += "\n__**User Activities:**__\n";
+                break;
+            case 6:
+                message_string += "\n__**Channel Activities:**__\n";
+                break;
+            case 9:
+                message_string += "\n__**Moderator Activities:**__\n";
+                break;
+            case 11:
+                message_string += "\n__**Roles Set:**__\n";
+                break;
+            default: 
+                break;
+        }
+        let list_values = Guild_Setting.list_values[i];
+        let result = Database.readGuild(guild_id, Guild_Setting.list_keys[i]);
+        message_string += `${list_values}: ${result == null ? "Not Set!" : `<#${result}>`}\n`;
+    }
+
+    return message_string;
 }

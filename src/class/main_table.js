@@ -26,16 +26,15 @@ module.exports = class Main_Table{
         db.prepare(sql).run();
         db.close();
 
-        if(this.debug) console.log(`Table ${this.table_name} found/created.`);
+        if(this.debug) console.log(`Table "${this.table_name}" found/created.`);
     }
 
     // Return all values present in database.
     readAllGuild(){
+        const sql = `SELECT * FROM "${this.table_name}"`;
+
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
-
-        const sql = `SELECT * FROM ${this.table_name}`;
-
-        let list_db_guilds = db.prepare(sql).all();
+        const list_db_guilds = db.prepare(sql).all();
         db.close();
 
         return list_db_guilds;
@@ -44,13 +43,13 @@ module.exports = class Main_Table{
     // Deletes the table.
     deleteAllGuild(){
         // Drop the indexing table.
-        let sql = `DROP INDEX IF EXISTS index_${this.table_name}`;
+        let sql = `DROP INDEX IF EXISTS "Index of ${this.table_name}"`;
 
         let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         db.prepare(sql).run();
 
         // Drop the entire table.
-        sql = `DROP TABLE IF EXISTS ${this.table_name}`;
+        sql = `DROP TABLE IF EXISTS "${this.table_name}"`;
         db.prepare(sql).run();
 
         db.close();

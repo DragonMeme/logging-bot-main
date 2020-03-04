@@ -1,0 +1,20 @@
+{
+    "Default Setting Value" : "Guild ID",
+    "Setting Values" : {
+        "UJ":"User Joins",
+        "UL":"User Leaves",
+        "UMD":"User Message Deletes",
+        "UME":"User Message Edits",
+        "UNC":"User Nickname Changes",
+        "URA":"User Role Assigns",
+
+        "BD":"Bulk Deletes",
+        "VJ":"Voice Chat Joins",
+        "VL":"Voice Chat Leaves",
+
+        "UK":"User Kicked",
+        "UM":"User Muted",
+
+        "MR":"Muted Role"
+    }
+}
