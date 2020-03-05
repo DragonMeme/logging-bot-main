@@ -13,7 +13,6 @@ module.exports = class Main_Table{
         this.debug = debug;
         this.tableName = tableName;
         const dir = "./data";
-
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir);
             if(this.debug){
@@ -24,10 +23,8 @@ module.exports = class Main_Table{
 
     initTable(sql){
         const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null});
-
         db.prepare(sql).run();
         db.close();
-
         if(this.debug){
             console.log(`Table "${this.tableName}" found/created.`);
         }
@@ -36,28 +33,22 @@ module.exports = class Main_Table{
     // Return all values present in database.
     readAllGuild(){
         const sql = `SELECT * FROM "${this.tableName}"`;
-
         const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         const listDB = db.prepare(sql).all();
         db.close();
-
         return listDB;
     }
 
     // Deletes the table.
     deleteAllGuild(){
-        // Drop the indexing table.
+        // Drop the indexing table if it exists.
         let sql = `DROP INDEX IF EXISTS "Index of ${this.tableName}"`;
-
         const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         db.prepare(sql).run();
-
         // Drop the entire table.
         sql = `DROP TABLE IF EXISTS "${this.tableName}"`;
         db.prepare(sql).run();
-
         db.close();
-
         delete this;
     }
 }

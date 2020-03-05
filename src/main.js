@@ -38,7 +38,7 @@ client.on("message", async (msg) => {
 
 /* 
     The bot that is invited to a guild must have more than 50 human members, 
-    or has the bot owner is the owner of the guild, otherwise bot leaves 
+    or has the bot owner as the owner of the guild, otherwise bot leaves 
     guild automatically.
 */
 client.on("guildCreate", async (guild) => {

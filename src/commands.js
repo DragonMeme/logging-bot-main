@@ -18,8 +18,6 @@ exports.processCommand = function(msg, client){
         In practical most commonly executed commands appears on top first.
         So checks in order of most likely commonly used commands.
     */
-
-    //Any user can use these commands.
     if(firstArgument.length > 0){
         switch(firstArgument){
             case "ping":
@@ -28,17 +26,14 @@ exports.processCommand = function(msg, client){
                 msg.channel.send("Pong!").then(
                     // Attempt to edit the message by adding the time.
                     sent => {
-
                         // Obtain time stamp between user message and bot message.
                         var timePing = sent.createdTimestamp;
                         var ping = timePing - timeSent;
-
                         // Add ping message.
                         sent.edit(`Pong! \`${String(ping)}ms\``);
                     }
                 );
                 break;
-
             case "invite":
                 msg.react("🤔")
                 const embed = new discord.RichEmbed()
@@ -60,12 +55,10 @@ exports.processCommand = function(msg, client){
                 if(hasAdminPermissions(msg)){
                     const guildID = msg.guild.id;
                     const validOption = guildSetting.listKeysSettingTypes;
-
                     // In case there is no second argument "all" is used by default.
                     const defaultOption = !listVariables[1] ? validOption[0] : null;
                     const usableOption = validOption.includes(listVariables[1]);
                     const currentOption = usableOption ? listVariables[1]: defaultOption;
-
                     if(!currentOption){
                         msg.channel.send(`Invalid second argument \`${listVariables[1]}\`.`)
                     }else{
@@ -160,6 +153,5 @@ function printStatusLog(maximum, minimum, guildID){
         let result = database.readGuild(guildID, guildSetting.listKeysSettingValues[i]);
         messageString += `${listValues}: ${result == null ? "Not Set!" : `<#${result}>`}\n`;
     }
-
     return messageString;
 }

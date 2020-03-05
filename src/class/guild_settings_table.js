@@ -62,7 +62,6 @@ module.exports = class Guild_Settings_Table extends Main_Table{
         const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         db.prepare(sql).run(info, guild);
         db.close();
-
         if(this.debug){
             console.log(`Updated ${settingType} to ${guildIDTitle} "${guild}"`);
         }
@@ -73,7 +72,6 @@ module.exports = class Guild_Settings_Table extends Main_Table{
     */
     deleteGuild(listGuild){
         const sql = `DELETE FROM "${this.tableName}" WHERE "${guildIDTitle}" = ?`;
-
         const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         const statement = db.prepare(sql);
         listGuild.forEach(guild => {
