@@ -1,4 +1,4 @@
-const Sqlite3 = require("better-sqlite3");
+const sqlite3 = require("better-sqlite3");
 const fs = require("fs");
 
 // Template class for constructing sql functionality.
@@ -9,47 +9,51 @@ module.exports = class Main_Table{
         - Takes control of the table of given table name.
         - (OPTIONAL) Prints human readable debug logs.
     */
-    constructor(table_name, debug){
+    constructor(tableName, debug){
         this.debug = debug;
-        this.table_name = table_name;
+        this.tableName = tableName;
         const dir = "./data";
 
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir);
-            if(this.debug) console.log(`Creating data directory for database.`);
+            if(this.debug){
+                console.log(`Creating data directory for database.`);
+            }
         }
     }
 
     initTable(sql){
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null});
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null});
 
         db.prepare(sql).run();
         db.close();
 
-        if(this.debug) console.log(`Table "${this.table_name}" found/created.`);
+        if(this.debug){
+            console.log(`Table "${this.tableName}" found/created.`);
+        }
     }
 
     // Return all values present in database.
     readAllGuild(){
-        const sql = `SELECT * FROM "${this.table_name}"`;
+        const sql = `SELECT * FROM "${this.tableName}"`;
 
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
-        const list_db_guilds = db.prepare(sql).all();
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+        const listDB = db.prepare(sql).all();
         db.close();
 
-        return list_db_guilds;
+        return listDB;
     }
 
     // Deletes the table.
     deleteAllGuild(){
         // Drop the indexing table.
-        let sql = `DROP INDEX IF EXISTS "Index of ${this.table_name}"`;
+        let sql = `DROP INDEX IF EXISTS "Index of ${this.tableName}"`;
 
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         db.prepare(sql).run();
 
         // Drop the entire table.
-        sql = `DROP TABLE IF EXISTS "${this.table_name}"`;
+        sql = `DROP TABLE IF EXISTS "${this.tableName}"`;
         db.prepare(sql).run();
 
         db.close();

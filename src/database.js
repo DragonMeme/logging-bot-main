@@ -1,59 +1,62 @@
-Guild_Setting_Table = require("./class/guild_settings_table.js");
-Guild_Setting_Common = require("./common/guild_setting.js");
+guildSettingTableClass = require("./class/guild_settings_table.js");
+guildSettingCommon = require("./common/guild_setting.js");
 
 require("dotenv").config();
 
-const author = String(process.env.AUTHOR_ID);
-const g_setting = new Guild_Setting_Table("Server Settings", true);
+const author = process.env.AUTHOR_ID;
+const guildSettingTable = new guildSettingTableClass("Server Settings", true);
+const guildIDTitle = guildSettingCommon.selectSettings("G");
 
 exports.initDB = function(client){
-    let list_guild_id = [];
-    let guild_to_add = [];
+    let listGuildID = [];
+    let guildToAddToDatabase = [];
  
     // Ensure to only add guilds that meet the pre-requisites.
     client.guilds.forEach(guild => {
-        let guild_id = guild.id;
+        let guildID = guild.id;
 
         // Leave any guild that does not meet the pre-requirements.
         if(guild.members.filter(member => !member.user.bot).size < 50){
 
             // The bot author is the only exception.
             if(guild.ownerID == author){
-                list_guild_id.push(guild_id);
+                listGuildID.push(guildID);
             }else{
                 guild.leave();
             }
 
         }else{
-            list_guild_id.push(guild_id);
+            listGuildID.push(guildID);
         }
         
     });
 
     // Check that the guild is already added to database.
     console.log("\nLooking for missing servers to add to database.");
-    guild_to_add = searchMissingGuildServerSettingsDB(list_guild_id);
+    guildToAddToDatabase = searchMissingGuildServerSettingsDB(listGuildID);
      
     // Insert guild ids that is yet to be added.
     console.log("\nAdding missing servers to database.");
-    g_setting.createGuild(guild_to_add);
+    guildSettingTable.createGuild(guildToAddToDatabase);
     console.log("New servers successfully added to database.");
 
     // Clear guilds that the bot is not in.
     console.log("\nRemoving any server that the bot is currently not in.");
-    pruneServerSettingsDB(list_guild_id);
+    pruneServerSettingsDB(listGuildID);
 
 };
 
 /*
     This function clears the database of any server that the bot is not in.
 */
-function pruneServerSettingsDB(updated_list){
-    list_db_guilds = g_setting.readAllGuild();
+function pruneServerSettingsDB(updatedList){
+    listGuildsInDatabase = guildSettingTable.readAllGuild();
 
-    list_db_guilds.forEach(guild => {
-        let guild_id  = guild[`${Guild_Setting_Common.select_settings("G")}`];
-        if(!updated_list.includes(guild_id)) g_setting.deleteGuild([guild_id]);
+    listGuildsInDatabase.forEach(guild => {
+        let guildID  = guild[`${guildIDTitle}`];
+        if(!updatedList.includes(guildID)){
+            guildSettingTable.deleteGuild([guildID]);
+        }
     });
     console.log("Servers successfully removed.");
 }
@@ -62,36 +65,36 @@ function pruneServerSettingsDB(updated_list){
     This function compares guilds that the bot is in with the ones stored in database.
     Returns a list of the guild that was not added to the database.
 */
-function searchMissingGuildServerSettingsDB(list_guild){
-    let added_items = [];
+function searchMissingGuildServerSettingsDB(listGuild){
+    let addedItems = [];
 
-    list_guild.forEach(guild => {
-        let row = g_setting.readGuild(guild, "G");
+    listGuild.forEach(guild => {
+        let row = guildSettingTable.readGuild(guild, "G");
         if(row == null){
-            added_items.push(guild);
-            console.log(`${Guild_Setting_Common.select_settings("G")} ${guild} not in database.`);
+            addedItems.push(guild);
+            console.log(`${guildIDTitle} ${guild} not in database.`);
         }
     });
 
     console.log("All guilds that the bot is in have been searched!");
-    return added_items;
+    return addedItems;
 }
 
 /*
     CRUD Commands.
 */
-exports.createGuild = function(list_guild){
-    g_setting.createGuild(list_guild);
+exports.createGuild = function(listGuild){
+    guildSettingTable.createGuild(listGuild);
 };
 
 exports.readGuild = function(guild, setting){
-    return g_setting.readGuild(guild, setting);
+    return guildSettingTable.readGuild(guild, setting);
 };
 
 exports.updateGuild = function(guild, info, setting){
-    g_setting.updateGuild(guild, info, setting);
+    guildSettingTable.updateGuild(guild, info, setting);
 };
 
-exports.deleteGuild = function(list_guild){
-    g_setting.deleteGuild(list_guild);
+exports.deleteGuild = function(listGuild){
+    guildSettingTable.deleteGuild(listGuild);
 };

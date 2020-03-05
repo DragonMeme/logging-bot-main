@@ -1,38 +1,36 @@
 const Main_Table = require("./main_table.js");
-const Setting = require("../common/guild_setting.js")
-const Sqlite3 = require("better-sqlite3");
+const guildSetting = require("../common/guild_setting.js")
+const sqlite3 = require("better-sqlite3");
+const guildIDTitle = guildSetting.selectSettings("G");
 
 /*
     The class stores rules as to which setting to post logs at.
 */
 module.exports = class Guild_Settings_Table extends Main_Table{
     
-    constructor(table_name, debug){
-        super(table_name, debug);
-        const list_keys = Setting.list_keys;
-
+    constructor(tableName, debug){
+        super(tableName, debug);
+        const listKeys = guildSetting.listKeysSettingValues;
         // String constructor for creating and initialising a table.
-        let sql = `CREATE TABLE IF NOT EXISTS "${this.table_name}"("${Setting.select_settings("G")}" TEXT UNIQUE NOT NULL, `;
-        for(let i = 0; i < list_keys.length; i++){
-            sql += `"${Setting.select_settings(list_keys[i])}" TEXT`;
-            if((i + 1) < list_keys.length) sql += ", ";
+        let sql = `CREATE TABLE IF NOT EXISTS "${this.tableName}"("${guildIDTitle}" TEXT UNIQUE NOT NULL, `;
+        for(let i = 0; i < listKeys.length; i++){
+            sql += `"${guildSetting.selectSettings(listKeys[i])}" TEXT`;
+            if((i + 1) < listKeys.length) sql += ", ";
             else sql += ")";
         }
-
         this.initTable(sql);
     }
 
     /*
         Adds a list of guilds to the database.
     */
-    createGuild(list_guild){
-        const sql = `INSERT INTO "${this.table_name}"("${Setting.select_settings("G")}") VALUES(?)`;
-
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+    createGuild(listGuild){
+        const sql = `INSERT INTO "${this.tableName}"("${guildIDTitle}") VALUES(?)`;
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         const statement = db.prepare(sql);
-        list_guild.forEach(guild => {
+        listGuild.forEach(guild => {
             statement.run(guild);
-            if(this.debug) console.log(`Successfully added ${Setting.select_settings("G")} (${guild}) to database.`);
+            if(this.debug) console.log(`Successfully added ${guildIDTitle} (${guild}) to database.`);
         });
         db.close();
     }
@@ -41,46 +39,49 @@ module.exports = class Guild_Settings_Table extends Main_Table{
         Read and return the specified setting present. 
     */
     readGuild(guild, setting){
-        const setting_type = Setting.select_settings(setting);
-        const sql = `SELECT "${setting_type}" FROM "${this.table_name}" WHERE "${Setting.select_settings("G")}" = ?`;
-
-        const db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+        const settingType = guildSetting.selectSettings(setting);
+        const sql = `SELECT "${settingType}" FROM "${this.tableName}" WHERE "${guildIDTitle}" = ?`;
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         const info = db.prepare(sql).get(guild);
         db.close();
-
-        if(!info) return null;
-        if(this.debug) console.log(`Obtained ${setting_type} (Value: ${info[setting_type]}) from database with ${Setting.select_settings("G")} ${guild}.`);
-        return info[setting_type];
+        if(!info){
+            return null;
+        }
+        if(this.debug){
+            console.log(`Obtained ${settingType} (Value: ${info[settingType]}) from database with ${guildIDTitle} ${guild}.`);
+        }
+        return info[settingType];
     }
 
     /*
         Update setting by setting channel ID. 
     */
     updateGuild(guild, info, setting){
-        const setting_type = Setting.select_settings(setting);
-        const sql = `UPDATE "${this.table_name}" SET "${setting_type}" = ? WHERE "${Setting.select_settings("G")}" = ?`;
-
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+        const settingType = guildSetting.selectSettings(setting);
+        const sql = `UPDATE "${this.tableName}" SET "${settingType}" = ? WHERE "${guildIDTitle}" = ?`;
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         db.prepare(sql).run(info, guild);
         db.close();
 
-        if(this.debug) {
-            console.log(`Updated ${setting_type} to ${Setting.select_settings("G")} "${guild}"`);
+        if(this.debug){
+            console.log(`Updated ${settingType} to ${guildIDTitle} "${guild}"`);
         }
     }
 
     /*
         Deletes a list of guilds from the database.
     */
-    deleteGuild(list_guild){
-        let sql = `DELETE FROM "${this.table_name}" WHERE "${Setting.select_settings("G")}" = ?`;
+    deleteGuild(listGuild){
+        const sql = `DELETE FROM "${this.tableName}" WHERE "${guildIDTitle}" = ?`;
 
-        let db = new Sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
+        const db = new sqlite3("data/server.db", {"verbose": this.debug ? console.log : null });
         const statement = db.prepare(sql);
-        list_guild.forEach(guild => {
+        listGuild.forEach(guild => {
             statement.run(guild);
-            if(this.debug) console.log(`Successfully removed guild with id "${guild}" from database.`);
-        })
+            if(this.debug){
+                console.log(`Successfully removed guild with id "${guild}" from database.`);
+            }
+        });
 
         db.close();
     }

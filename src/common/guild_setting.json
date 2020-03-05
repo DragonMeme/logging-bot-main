@@ -16,5 +16,33 @@
         "UM":"User Muted",
 
         "MR":"Muted Role"
+    },
+    "Setting Types" : {
+        "all":{
+            "max":12,
+            "min":0
+        },
+        "user":{
+            "max":6,
+            "min":0
+        },
+        "channel":{
+            "max":6,
+            "min":9
+        },
+        "mod":{
+            "max":11,
+            "min":9
+        },
+        "role":{
+            "max":12,
+            "min":11
+        }
+    },
+    "Status Headers":{
+        "0":"User Activities",
+        "6":"Channel Activities",
+        "9":"Moderator Activities",
+        "11":"Roles Set"
     }
 }
