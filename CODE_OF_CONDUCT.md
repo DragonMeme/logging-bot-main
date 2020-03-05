@@ -28,20 +28,20 @@ Example:
 ```js
 // Not wanted
 if(a && b){
-  do func1();
+  func1();
 }else{
-  do func2();
+  func2();
 }
 
 // Wanted
 if(a){
   if(b){
-    do func1();
+    func1();
   }else{
-    do func2();
+    func2();
   }
 }else{
-  do func2();
+  func2();
 }
 ```
 Reason: Putting multiple conditions in an if statement makes the overall condition harder for user to analyse. By using nested if statements, the condition flow makes the overall required condition easier to follow.
@@ -54,7 +54,7 @@ func1(){
   const missing = "fox";
 
   // Wanted 
-  const full_text = `This is a ${missing}.`;
+  const fullText = `This is a ${missing}.`;
 }
 
 func2(){
@@ -62,7 +62,7 @@ func2(){
   const missing = 'fox';
   
   // Not Wanted
-  const full_text = "This is a " + missing + ".";
+  const fullText = "This is a " + missing + ".";
 }
 
 ```
@@ -71,3 +71,25 @@ Reason: Strings closed with backticks has a nice feature that allows putting a v
 3.) Only code that has the required intended functionality completed may be pushed in to the intended repository.
 
 Users may only push working code to a non-default branch. Changes of code to the master branch should only happen when the requested branch has the optimized and working code and ready to be merged in to master.
+
+4.) Variable Naming convention.
+
+Anywhere in the code, variables must have their names without an underscore.
+```js
+/*
+  Supposedly read() function reads the database.
+  We want to assign the resultant to a variable.
+*/
+
+// Wanted (replace space with a starting capital letter of the 2nd word and so forth)
+readDatabase = read(input);
+
+// Acceptable (known shortcuts can be in all capitals)
+readDB = read(input);
+
+// Not Wanted (has underscore)
+read_Database = read(input);
+
+// Not Wanted (reduces readability)
+readdatabase = read(input);
+```
