@@ -2,7 +2,7 @@
     "ban":{
         "Examples":["ban 123456789012345678", "ban 123456789012345678 Trolling people", "ban 123456789012345678 \"Trolling people\""],
         "Permission":"Moderator",
-        "Long Description":"Applies a ban to a user from the server. The user will not be able to join the server again from the same IP address. Reason is optional but recommended to remind any other moderators or higher-ups the reason why the user was banned.",
+        "Long Description":"Applies a ban to a user from the server. The user will not be able to join the server again from the same IP address.",
         "Short Description":"Ban a user from the server.",
         "Usage":"ban <user> [reason]",
         "<user>":"Specifies the user. Can by supplied by mentioning the user or user ID.",
@@ -26,7 +26,7 @@
     "kick":{
         "Examples":["kick 123456789012345678", "kick 123456789012345678 Trolling people", "kick 123456789012345678 \"Trolling people\""],
         "Permission":"Moderator",
-        "Long Description":"Kicks the user from the server. Note that the user can re-join the server if they have the invite link. Reason is optional but recommended to remind any other moderators or higher-ups the reason why the user was kicked.",
+        "Long Description":"Kicks the user from the server. Note that the user can re-join the server if they have the invite link.",
         "Short Description":"Kicks a user from the server.",
         "Usage":"kick <user> [reason]",
         "<user>":"Specifies the user. Can by supplied by mentioning the user or user ID.",
@@ -35,7 +35,7 @@
     "mute":{
         "Examples":["mute 123456789012345678 1h", "mute 123456789012345678 2d Spamming images", "mute 123456789012345678 300m \"Spamming images\""],
         "Permission":"Moderator",
-        "Long Description":"Mutes the user in the current server for a specified amount of time. Note that if the muted role is not present, one will be created with all the text and voice channels set accordingly by the bot with the appropriate deny permissions. Reason is optional but recommended to remind any other moderators or higher-ups the reason why the user was muted.",
+        "Long Description":"Mutes the user in the current server for a specified amount of time. Note that if the muted role is not present, one will be created with all the text and voice channels set accordingly by the bot with the appropriate deny permissions.",
         "Short Description":"Mutes a user in the server for an amount of time.",
         "Usage":"mute <user> <time> [reason]",
         "<user>":"Specifies the user. Can by supplied by mentioning the user or user ID.",
@@ -71,6 +71,7 @@
         "Permission":"Administrator",
         "Long Description":"Prints which channel the specific activities are being logged to.",
         "Short Description":"Prints which channel the specific activities are being logged to.",
-        "Usage":"statuslog [option]"
+        "Usage":"statuslog [option]",
+        "[option]":"Choose the category of which logging types to show. Possible values include:\n- `all`\n- `channel`\n- `mod`\n- `user`\nNote that if no argument is supplied, `all` is used by default."
     }
 }
