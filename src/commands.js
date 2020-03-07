@@ -1,6 +1,7 @@
 const database = require("./database.js");
 const discord = require("discord.js");
 const guildSetting = require("./common/guild_setting.js");
+const helpInfo = require("./common/help.js");
 
 require("dotenv").config();
 
@@ -34,8 +35,25 @@ exports.processCommand = function(msg, client){
                     }
                 );
                 break;
+            case "help":
+                msg.react("🤔");
+                const listArgs = helpInfo.helpArguments;
+                if(!listVariables[1]){
+                    const embed = new discord.RichEmbed()
+                    .setColor("#00FFFF")
+                    .setTitle("Hyo Bot Help! (Click here to join the support server)")
+                    .setDescription(helpInfo.getMainDescription(prefix))
+                    .setURL(process.env.MAIN_SERVER_LINK);
+                    listArgs.forEach(arg =>{
+                        let usage = helpInfo.getUsage(arg);
+                        let shortDescription = helpInfo.getShortDescription(arg);
+                        embed.addField(`${prefix}${usage}`, shortDescription);
+                    });
+                    msg.author.send(embed);
+                }
+                break;
             case "invite":
-                msg.react("🤔")
+                msg.react("🤔");
                 const embed = new discord.RichEmbed()
                     .setColor("#00FFFF")
                     .setTitle("Click here to invite me!")

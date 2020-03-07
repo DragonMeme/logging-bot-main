@@ -1,0 +1,38 @@
+{
+    "ban":{
+        "Short Description":"Ban a user from the server.",
+        "Usage":"ban <user> [reason]"
+    },
+    "help":{
+        "Short Description":"DMs you about what the bot can do.",
+        "Usage":"help [command]"
+    },   
+    "invite":{
+        "Short Description":"DMs you a hyperlink to an embed to invite the bot.",
+        "Usage":"invite"
+    },
+    "kick":{
+        "Short Description":"Kicks a user from the server.",
+        "Usage":"kick <user> [reason]"
+    },
+    "mute":{
+        "Short Description":"Mutes a user in the server for an amount of time.",
+        "Usage":"mute <user> <time> [reason]"
+    },
+    "ping":{
+        "Short Description":"Checks latency of bot.",
+        "Usage":"ping"
+    },
+    "quicksetlog":{
+        "Short Description":"Set logs more faster with template options.",
+        "Usage":"quicksetlog <option>"
+    },
+    "setlog":{
+        "Short Description":"Advanced command on customise log settings.",
+        "Usage":"setlog <activity> [on/off]"
+    },
+    "statuslog":{
+        "Short Description":"Print out current channels the logs will be posted to.",
+        "Usage":"statuslog [option]"
+    }
+}
