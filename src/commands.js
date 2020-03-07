@@ -35,7 +35,8 @@ exports.processCommand = function(message, client){
                 break;
 
                 default: // Too many arguments.
-                message.channel.send("Too many arguments for command `ping`!");
+                const messageString = "Too many arguments for command `ping`!"
+                sendErrorAndDeleteUserAndClientMessage(message, messageString);
                 break;
             }
             break;
@@ -52,8 +53,8 @@ exports.processCommand = function(message, client){
                 .setURL(process.env.MAIN_SERVER_LINK);
                 listArguments.forEach(
                     argument => {
-                        let usage = helpInfo.getParameter(argument, "Usage");
-                        let shortDescription = helpInfo.getParameter(argument, "Short Description");
+                        const usage = helpInfo.getParameter(argument, "Usage");
+                        const shortDescription = helpInfo.getParameter(argument, "Short Description");
                         embed.addField(`${prefix}${usage}`, shortDescription);
                     }
                 );
@@ -75,8 +76,8 @@ exports.processCommand = function(message, client){
                     let showExampleString = "";
                     splitUsage.forEach(
                         argumentPart => { // Each variable argument has its own fields.
-                            let descriptionArgument = helpInfo.getParameter(secondArgument, argumentPart);
-                            let overallDescription = `${argumentPart.startsWith("[") ? "OPTIONAL" : "REQUIRED"}: ${descriptionArgument}`;
+                            const descriptionArgument = helpInfo.getParameter(secondArgument, argumentPart);
+                            const overallDescription = `${argumentPart.startsWith("[") ? "OPTIONAL" : "REQUIRED"}: ${descriptionArgument}`;
                             embed.addField(argumentPart, overallDescription);
                         }
                     );
@@ -90,29 +91,26 @@ exports.processCommand = function(message, client){
                     }
                     message.author.send(embed);
                 }else{ // Unsupported commands for user.
-                    message.channel.send(`Sorry, I do not process command \`${secondArgument}\``).then(
-                        sentMessage => {
-                            message.delete(2000);
-                            sentMessage.delete(2000);
-                        }
-                    );
+                    const messageString = `Sorry, I do not process command \`${secondArgument}\``;
+                    sendErrorAndDeleteUserAndClientMessage(message, messageString);
                 }
                 break;
 
                 default: // Too many arguments.
-                message.channel.send("Too many arguments for command `help`!");
+                const messageString = "Too many arguments for command `help`!";
+                sendErrorAndDeleteUserAndClientMessage(message, messageString);
                 break;
             }
             break;
 
             case "invite":
-                message.react("🤔");
-                const embed = new discord.RichEmbed()
-                    .setColor("#00FFFF")
-                    .setTitle("Click here to invite me!")
-                    .setURL(`${partInviteLink}?client_id=${clientID}&permissions=268495958&scope=bot`);
-                message.author.send(embed);
-                break;
+            message.react("🤔");
+            const embed = new discord.RichEmbed()
+                .setColor("#00FFFF")
+                .setTitle("Click here to invite me!")
+                .setURL(`${partInviteLink}?client_id=${clientID}&permissions=268495958&scope=bot`);
+            message.author.send(embed);
+            break;
 
             /*
                 MODERATOR ONLY COMMANDS
@@ -123,21 +121,22 @@ exports.processCommand = function(message, client){
                 ADMINISTRATOR ONLY COMMANDS
             */
             case "statuslog":
-                if(hasAdminPermissions(message)){
-                    const guildID = message.guild.id;
-                    const validOption = guildSetting.listKeysSettingTypes;
-                    // In case there is no second argument "all" is used by default.
-                    const defaultOption = !listVariables[1] ? validOption[0] : null;
-                    const usableOption = validOption.includes(listVariables[1]);
-                    const currentOption = usableOption ? listVariables[1]: defaultOption;
-                    if(!currentOption){
-                        message.channel.send(`Invalid second argument \`${listVariables[1]}\`.`)
-                    }else{
-                        const maxMin = guildSetting.selectCategory(currentOption);
-                        message.channel.send(printStatusLog(maxMin["max"], maxMin["min"], guildID));
-                    }
+            if(hasAdminPermissions(message)){
+                const guildID = message.guild.id;
+                const validOption = guildSetting.listKeysSettingTypes;
+                // In case there is no second argument "all" is used by default.
+                const defaultOption = !listVariables[1] ? validOption[0] : null;
+                const usableOption = validOption.includes(listVariables[1]);
+                const currentOption = usableOption ? listVariables[1]: defaultOption;
+                if(!currentOption){
+                    const messageString = `Invalid second argument \`${listVariables[1]}\`.`;
+                    sendErrorAndDeleteUserAndClientMessage(message, messageString);
+                }else{
+                    const maxMin = guildSetting.selectCategory(currentOption);
+                    message.channel.send(printStatusLog(maxMin["max"], maxMin["min"], guildID));
                 }
-                break;
+            }
+            break;
 
             /*
                 BOT OWNER ONLY COMMANDS
@@ -145,25 +144,21 @@ exports.processCommand = function(message, client){
                 redirected to the default case.
             */
             case "shutdown":
-                if(message.author.id == author){
-                    message.channel.send("Shutting down!").then(() => {
-                        console.log("\nShutting down!");
-                        client.destroy();
-                    });
-                    break;
-                }  
+            if(message.author.id == author){
+                message.channel.send("Shutting down!").then(() => {
+                    console.log("\nShutting down!");
+                    client.destroy();
+                });
+                break;
+            }  
 
             /*
                 ANY OTHER COMMAND WILL TRIGGER THIS!
             */
             default:
-                message.channel.send(`Unknown command \`${firstArgument}\``).then(
-                    sentMessage => {
-                        message.delete(2000);
-                        sentMessage.delete(2000);
-                    }
-                )
-                break;
+            const messageString = `Unknown command \`${firstArgument}\``;
+            sendErrorAndDeleteUserAndClientMessage(message, messageString);
+            break;
         }
     }
 };
@@ -219,9 +214,18 @@ function printStatusLog(maximum, minimum, guildID){
         if(Object.keys(headers).includes(String(i))) {
             messageString += `\n__**${headers[String(i)]}:**__\n`;
         }
-        let listValues = guildSetting.listValuesSettingValues[i];
-        let result = database.readGuild(guildID, guildSetting.listKeysSettingValues[i]);
+        const listValues = guildSetting.listValuesSettingValues[i];
+        const result = database.readGuild(guildID, guildSetting.listKeysSettingValues[i]);
         messageString += `${listValues}: ${result == null ? "Not Set!" : `<#${result}>`}\n`;
     }
     return messageString;
+}
+
+function sendErrorAndDeleteUserAndClientMessage(message, messageContent){
+    message.channel.send(messageContent).then(
+        sentMessage => {
+            message.delete(2000);
+            sentMessage.delete(2000);
+        }
+    );
 }
