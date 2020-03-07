@@ -9,10 +9,10 @@ const author = process.env.AUTHOR_ID;
 const prefix = process.env.PREFIX;
 const partInviteLink = "https://discordapp.com/api/oauth2/authorize";
 
-exports.processCommand = function(msg, client){
-    const listVariables = msg.content.toLowerCase().slice(prefix.length).split(" ");
-    //console.log(`\n${String(listVariables)}`);
-    const firstArgument = listVariables[0];
+exports.processCommand = function(message, client){
+    const listVariables = message.content.toLowerCase().slice(prefix.length).split(" ");
+    const firstArgument = listVariables[0]; // Main argument
+    const otherArguments = listVariables.slice(1); // Other argument(s).
     const clientID = client.id;
 
     /*
@@ -22,43 +22,96 @@ exports.processCommand = function(msg, client){
     if(firstArgument.length > 0){
         switch(firstArgument){
             case "ping":
-                // Obtain time the user sent the message.
-                var timeSent = msg.createdTimestamp;
-                msg.channel.send("Pong!").then(
-                    // Attempt to edit the message by adding the time.
-                    sent => {
-                        // Obtain time stamp between user message and bot message.
-                        var timePing = sent.createdTimestamp;
-                        var ping = timePing - timeSent;
-                        // Add ping message.
-                        sent.edit(`Pong! \`${String(ping)}ms\``);
+            switch(otherArguments.length){
+                case 0: // No other arguments needed.
+                const timeSent = message.createdTimestamp;
+                message.channel.send("Pong!").then(
+                    sentMessage => {
+                        const timeResponse = sentMessage.createdTimestamp;
+                        const ping = timeResponse - timeSent;
+                        sentMessage.edit(`Pong! \`${String(ping)}ms\``);
                     }
                 );
                 break;
+
+                default: // Too many arguments.
+                message.channel.send("Too many arguments for command `ping`!");
+                break;
+            }
+            break;
+
             case "help":
-                msg.react("🤔");
-                const listArgs = helpInfo.helpArguments;
-                if(!listVariables[1]){
-                    const embed = new discord.RichEmbed()
-                    .setColor("#00FFFF")
-                    .setTitle("Hyo Bot Help! (Click here to join the support server)")
-                    .setDescription(helpInfo.getMainDescription(prefix))
-                    .setURL(process.env.MAIN_SERVER_LINK);
-                    listArgs.forEach(arg =>{
-                        let usage = helpInfo.getUsage(arg);
-                        let shortDescription = helpInfo.getShortDescription(arg);
+            const listArguments = helpInfo.helpArguments;
+            switch(otherArguments.length){
+                case 0: // No second argument.
+                message.react("🤔");
+                const embed = new discord.RichEmbed()
+                .setColor("#00FFFF")
+                .setTitle("Hyo Bot Help! (Click here to join the support server)")
+                .setDescription(helpInfo.getMainDescription(prefix))
+                .setURL(process.env.MAIN_SERVER_LINK);
+                listArguments.forEach(
+                    argument => {
+                        let usage = helpInfo.getParameter(argument, "Usage");
+                        let shortDescription = helpInfo.getParameter(argument, "Short Description");
                         embed.addField(`${prefix}${usage}`, shortDescription);
-                    });
-                    msg.author.send(embed);
+                    }
+                );
+                message.author.send(embed);
+                break;
+
+                case 1: // Has a second argument.
+                const secondArgument = otherArguments[0];
+                if(listArguments.includes(secondArgument)){
+                    message.react("🤔");
+                    const usage = helpInfo.getParameter(secondArgument, "Usage");
+                    const showExamples = helpInfo.getParameter(secondArgument, "Examples");
+                    const splitUsage = usage.split(" ").slice(1); // Since first argument is main
+                    const embed = new discord.RichEmbed()
+                    .setColor("#00FFFF").setTitle(`COMMAND: ${secondArgument}`)
+                    .setDescription(helpInfo.getParameter(secondArgument, "Long Description"))
+                    .addField("Permission Level", helpInfo.getParameter(secondArgument, "Permission"))
+                    .addField("Usage", `\`${prefix}${usage}\``);
+                    let showExampleString = "";
+                    splitUsage.forEach(
+                        argumentPart => { // Each variable argument has its own fields.
+                            let descriptionArgument = helpInfo.getParameter(secondArgument, argumentPart);
+                            let overallDescription = `${argumentPart.startsWith("[") ? "OPTIONAL" : "REQUIRED"}: ${descriptionArgument}`;
+                            embed.addField(argumentPart, overallDescription);
+                        }
+                    );
+                    showExamples.forEach(
+                        example => {
+                            showExampleString += `\`${prefix}${example}\`\n`;
+                        }
+                    );
+                    if(showExamples.length > 0){
+                        embed.addField(`Example${showExamples.length === 1 ? "":"s"}`, showExampleString);
+                    }
+                    message.author.send(embed);
+                }else{ // Unsupported commands for user.
+                    message.channel.send(`Sorry, I do not process command \`${secondArgument}\``).then(
+                        sentMessage => {
+                            message.delete(2000);
+                            sentMessage.delete(2000);
+                        }
+                    );
                 }
                 break;
+
+                default: // Too many arguments.
+                message.channel.send("Too many arguments for command `help`!");
+                break;
+            }
+            break;
+
             case "invite":
-                msg.react("🤔");
+                message.react("🤔");
                 const embed = new discord.RichEmbed()
                     .setColor("#00FFFF")
                     .setTitle("Click here to invite me!")
                     .setURL(`${partInviteLink}?client_id=${clientID}&permissions=268495958&scope=bot`);
-                msg.author.send(embed);
+                message.author.send(embed);
                 break;
 
             /*
@@ -70,18 +123,18 @@ exports.processCommand = function(msg, client){
                 ADMINISTRATOR ONLY COMMANDS
             */
             case "statuslog":
-                if(hasAdminPermissions(msg)){
-                    const guildID = msg.guild.id;
+                if(hasAdminPermissions(message)){
+                    const guildID = message.guild.id;
                     const validOption = guildSetting.listKeysSettingTypes;
                     // In case there is no second argument "all" is used by default.
                     const defaultOption = !listVariables[1] ? validOption[0] : null;
                     const usableOption = validOption.includes(listVariables[1]);
                     const currentOption = usableOption ? listVariables[1]: defaultOption;
                     if(!currentOption){
-                        msg.channel.send(`Invalid second argument \`${listVariables[1]}\`.`)
+                        message.channel.send(`Invalid second argument \`${listVariables[1]}\`.`)
                     }else{
                         const maxMin = guildSetting.selectCategory(currentOption);
-                        msg.channel.send(printStatusLog(maxMin["max"], maxMin["min"], guildID));
+                        message.channel.send(printStatusLog(maxMin["max"], maxMin["min"], guildID));
                     }
                 }
                 break;
@@ -92,9 +145,8 @@ exports.processCommand = function(msg, client){
                 redirected to the default case.
             */
             case "shutdown":
-                if(msg.author.id == author){
-                    // Send a message before shutting down.
-                    msg.channel.send("Shutting down!").then(() => {
+                if(message.author.id == author){
+                    message.channel.send("Shutting down!").then(() => {
                         console.log("\nShutting down!");
                         client.destroy();
                     });
@@ -105,10 +157,10 @@ exports.processCommand = function(msg, client){
                 ANY OTHER COMMAND WILL TRIGGER THIS!
             */
             default:
-                msg.channel.send(`Unknown command \`${listVariables[0]}\``).then(
-                    sent => {
-                        msg.delete(2000);
-                        sent.delete(2000);
+                message.channel.send(`Unknown command \`${firstArgument}\``).then(
+                    sentMessage => {
+                        message.delete(2000);
+                        sentMessage.delete(2000);
                     }
                 )
                 break;
@@ -119,10 +171,9 @@ exports.processCommand = function(msg, client){
 /*
     HELPER FUNCTIONS
 */
-function hasModPermissions(msg){
-    const member = msg.guild.members.find(member => member.id === msg.author.id);
+function hasModPermissions(message){
+    const member = message.guild.members.find(member => member.id === message.author.id);
     let permissionLevel = 0;
-    // A moderator should have at least 3 of the permissions.
     if(member.hasPermission(0x2)) permissionLevel++; // Kick Member
     if(member.hasPermission(0x4)) permissionLevel++; // Ban Member
     if(member.hasPermission(0x2000)) permissionLevel++; // Manage Messages
@@ -130,15 +181,16 @@ function hasModPermissions(msg){
     if(permissionLevel > 2){
         return true;
     }else{
-        return insufficientPermissionsPrint(msg);
+        return insufficientPermissionsPrint(message);
     }
 }
 
-function hasAdminPermissions(msg){
-    if(!hasModPermissions(msg)) return false;
-    const member = msg.guild.members.find(member => member.id === msg.author.id);
+function hasAdminPermissions(message){
+    if(!hasModPermissions(message)){
+        return false;
+    }
+    const member = message.guild.members.find(member => member.id === message.author.id);
     let permissionLevel = 0;
-    // An admin should have at least 3 of the permissions along with all mod permissions.
     if(member.hasPermission(0x8)) permissionLevel++; // Administrator (not required)
     if(member.hasPermission(0x10)) permissionLevel++; // Manage Channels
     if(member.hasPermission(0x20)) permissionLevel++; // Manage Guild
@@ -146,14 +198,14 @@ function hasAdminPermissions(msg){
     if(permissionLevel > 2){
         return true;
     }else{
-        return insufficientPermissionsPrint(msg);
+        return insufficientPermissionsPrint(message);
     }
 }
 
-function insufficientPermissionsPrint(msg){
-    msg.channel.send("Insufficient permissions to run command.").then(
+function insufficientPermissionsPrint(message){
+    message.channel.send("Insufficient permissions to run command.").then(
         sent => {
-            msg.delete(2000);
+            message.delete(2000);
             sent.delete(2000);
         }
     )

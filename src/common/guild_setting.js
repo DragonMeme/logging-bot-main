@@ -1,5 +1,5 @@
 // The contents of guild_setting.json should not change while the program is running.
-const jsonData = require('./guild_setting.json');
+const jsonData = require("./guild_setting.json");
 // For reading activity types.
 const jsonKeysSettingValues = Object.keys(jsonData["Setting Values"]);
 const jsonValuesSettingValues = Object.values(jsonData["Setting Values"]);

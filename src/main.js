@@ -25,15 +25,15 @@ client.on("ready", async () => {
 /*
     The main place to supposedly run commands by users.
 */
-client.on("message", async (msg) => {
-    if(!msg.content.startsWith(prefix)) return;
-    if(msg.author.bot) return;
+client.on("message", async (message) => {
+    if(!message.content.startsWith(prefix)) return;
+    if(message.author.bot) return;
     if(client.user.presence.status != "online") {
-        if(msg.author.id != author) {
+        if(message.author.id != author) {
             return;
         }
     }
-    command.processCommand(msg, client);
+    command.processCommand(message, client);
 });
 
 /* 
