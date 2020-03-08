@@ -10,30 +10,26 @@ const guildIDTitle = guildSettingCommon.selectSettings("G");
 exports.initDB = function(client){
     let listGuildID = [];
     let guildToAddToDatabase = [];
-    // Ensure to only add guilds that meet the pre-requisites.
-    client.guilds.forEach(guild => {
-        let guildID = guild.id;
-        // Leave any guild that does not meet the pre-requirements.
-        if(guild.members.filter(member => !member.user.bot).size < 50){
-            // The bot author is the only exception.
-            if(guild.ownerID == author){
-                listGuildID.push(guildID);
+    
+    client.guilds.forEach(
+        guild => {// Ensure to only add guilds that meet the pre-requisites.
+            let guildID = guild.id;
+            if(guild.members.filter(member => !member.user.bot).size < 50){
+                if(guild.ownerID == author){ // The bot author is the only exception.
+                    listGuildID.push(guildID);
+                }else{
+                    guild.leave();
+                }
             }else{
-                guild.leave();
+                listGuildID.push(guildID);
             }
-        }else{
-            listGuildID.push(guildID);
         }
-    });
-
-    // Check that the guild is already added to database.
+    );
     console.log("\nLooking for missing servers to add to database.");
     guildToAddToDatabase = searchMissingGuildServerSettingsDB(listGuildID);
-    // Insert guild ids that is yet to be added.
     console.log("\nAdding missing servers to database.");
     guildSettingTable.createGuild(guildToAddToDatabase);
     console.log("New servers successfully added to database.");
-    // Clear guilds that the bot is not in.
     console.log("\nRemoving any server that the bot is currently not in.");
     pruneServerSettingsDB(listGuildID);
 };

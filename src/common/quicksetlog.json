@@ -1,0 +1,8 @@
+{
+    "forceoff":"Turns off all logging for every channel.",
+    "messages":"Turns on \"bulk_delete\", \"message_delete\" and \"message_edit\".",
+    "mod":"Turns on \"user_kick\" and \"user_mute\".",
+    "off":"Turns off all logging for this channel.",
+    "user":"Turns on \"message_delete\", \"message_edit\", \"nickname_changes\" and \"role_assign\".",
+    "vc":"Turns on \"vc_join\" and \"vc_leave\"."
+}
