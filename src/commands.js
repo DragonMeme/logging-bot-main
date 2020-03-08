@@ -1,7 +1,8 @@
 const database = require("./database.js");
 const discord = require("discord.js");
 const guildSetting = require("./common/guild_setting.js");
-const helpInfo = require("./common/help.js");
+const pingCMD = require("./commands/user/ping.js");
+const helpCMD = require("./commands/user/help");
 
 require("dotenv").config();
 
@@ -12,7 +13,6 @@ const partInviteLink = "https://discordapp.com/api/oauth2/authorize";
 exports.processCommand = function(message, client){
     const listVariables = message.content.toLowerCase().slice(prefix.length).split(" ");
     const firstArgument = listVariables[0]; // Main argument
-    const otherArguments = listVariables.slice(1); // Other argument(s).
     const clientID = client.id;
 
     /*
@@ -22,85 +22,11 @@ exports.processCommand = function(message, client){
     if(firstArgument.length > 0){
         switch(firstArgument){
             case "ping":
-            switch(otherArguments.length){
-                case 0: // No other arguments needed.
-                const timeSent = message.createdTimestamp;
-                message.channel.send("Pong!").then(
-                    sentMessage => {
-                        const timeResponse = sentMessage.createdTimestamp;
-                        const ping = timeResponse - timeSent;
-                        sentMessage.edit(`Pong! \`${String(ping)}ms\``);
-                    }
-                );
-                break;
-
-                default: // Too many arguments.
-                const messageString = "Too many arguments for command `ping`!"
-                sendErrorAndDeleteUserAndClientMessage(message, messageString);
-                break;
-            }
+            new pingCMD(message, listVariables).execute();
             break;
 
             case "help":
-            const listArguments = helpInfo.helpArguments;
-            switch(otherArguments.length){
-                case 0: // No second argument.
-                message.react("🤔");
-                const embed = new discord.RichEmbed()
-                .setColor("#00FFFF")
-                .setTitle("Hyo Bot Help! (Click here to join the support server)")
-                .setDescription(helpInfo.getMainDescription(prefix))
-                .setURL(process.env.MAIN_SERVER_LINK);
-                listArguments.forEach(
-                    argument => {
-                        const usage = helpInfo.getParameter(argument, "Usage");
-                        const shortDescription = helpInfo.getParameter(argument, "Short Description");
-                        embed.addField(`${prefix}${usage}`, shortDescription);
-                    }
-                );
-                message.author.send(embed);
-                break;
-
-                case 1: // Has a second argument.
-                const secondArgument = otherArguments[0];
-                if(listArguments.includes(secondArgument)){
-                    message.react("🤔");
-                    const usage = helpInfo.getParameter(secondArgument, "Usage");
-                    const showExamples = helpInfo.getParameter(secondArgument, "Examples");
-                    const splitUsage = usage.split(" ").slice(1); // Since first argument is main
-                    const embed = new discord.RichEmbed()
-                    .setColor("#00FFFF").setTitle(`COMMAND: ${secondArgument}`)
-                    .setDescription(helpInfo.getParameter(secondArgument, "Long Description"))
-                    .addField("Permission Level", helpInfo.getParameter(secondArgument, "Permission"))
-                    .addField("Usage", `\`${prefix}${usage}\``);
-                    let showExampleString = "";
-                    splitUsage.forEach(
-                        argumentPart => { // Each variable argument has its own fields.
-                            const descriptionArgument = helpInfo.getParameter(secondArgument, argumentPart);
-                            const overallDescription = `${argumentPart.startsWith("[") ? "OPTIONAL" : "REQUIRED"}: ${descriptionArgument}`;
-                            embed.addField(argumentPart, overallDescription);
-                        }
-                    );
-                    showExamples.forEach(
-                        example => {
-                            showExampleString += `\`${prefix}${example}\`\n`;
-                        }
-                    );
-                    if(showExamples.length > 0){
-                        embed.addField(`Example${showExamples.length === 1 ? "":"s"}`, showExampleString);
-                    }
-                    message.author.send(embed);
-                }else{ // Unsupported commands for user.
-                    const messageString = `Sorry, I do not process command \`${secondArgument}\``;
-                    sendErrorAndDeleteUserAndClientMessage(message, messageString);
-                }
-                break;
-
-                default: // Too many arguments.
-                const messageString = "Too many arguments for command `help`!";
-                sendErrorAndDeleteUserAndClientMessage(message, messageString);
-                break;
-            }
+            new helpCMD(message, listVariables, prefix).execute();
             break;
 
             case "invite":

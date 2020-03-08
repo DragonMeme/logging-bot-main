@@ -55,7 +55,15 @@
         "Long Description":"Allows for quickly setting up the current text channel for the bot to log specific activities.",
         "Short Description":"Set logs more faster with template options.",
         "Usage":"quicksetlog <option>",
-        "<option>":"Input options that one can use. \nPossible values for an average user include:"
+        "<option>":"Input options that one can use. \nPossible values for an average user include:",
+        "extraOption":{
+            "forceoff":"Turns off all logging for every channel.",
+            "messages":"Turns on \"bulk_delete\", \"message_delete\" and \"message_edit\".",
+            "mod":"Turns on \"user_kick\" and \"user_mute\".",
+            "off":"Turns off all logging for this channel.",
+            "user":"Turns on \"message_delete\", \"message_edit\", \"nickname_changes\" and \"role_assign\".",
+            "vc":"Turns on \"vc_join\" and \"vc_leave\"."
+        }
     },
     "setlog":{
         "Examples":["setlog message_edit", "setlog message_delete on"],
@@ -64,7 +72,8 @@
         "Short Description":"Advanced command on customising log settings.",
         "Usage":"setlog <activity> [on/off]",
         "<activity>":"Specific activity that one can use:\nPossible values include:",
-        "[on/off]":"Turn on or off a specific activity.\nPossible values include:\n- `off`\n- `on`\nIf none are supplied, turns on a specific activity to the current channel if not set to the current channel, otherwise turn off logging of specific activity for the current channel."
+        "[on/off]":"Turn on or off a specific activity.\nPossible values include:\n- `off`\n- `on`\nIf none are supplied, turns on a specific activity to the current channel if not set to the current channel, otherwise turn off logging of specific activity for the current channel.",
+        "extraOption":["bulk_delete", "message_delete", "message_edit", "nickname_change", "role_assign", "user_join", "user_kicked", "user_leave", "user_muted", "vc_join", "vc_leave"]
     },
     "statuslog":{
         "Examples":["statuslog", "statuslog user"],

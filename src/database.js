@@ -1,4 +1,4 @@
-guildSettingTableClass = require("./class/guild_settings_table.js");
+guildSettingTableClass = require("./table/guild_settings_table.js");
 guildSettingCommon = require("./common/guild_setting.js");
 
 require("dotenv").config();
