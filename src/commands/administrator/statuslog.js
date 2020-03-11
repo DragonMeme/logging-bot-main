@@ -22,7 +22,7 @@ module.exports = class statuslog extends Administrator_Command{
             break;
 
             case 1: 
-            const currentOption = this.argumentList[1];
+            const currentOption = this.otherArguments[0];
             if(this.validOptions.includes(currentOption)){ // Check that second argument is valid.
                 const maxMin = guildSetting.selectCategory(currentOption);
                 this.message.channel.send(this.printStatusLog(maxMin["max"], maxMin["min"]));
