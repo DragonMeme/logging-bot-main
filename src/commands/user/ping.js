@@ -18,9 +18,8 @@ module.exports = class ping extends Command{
             );
             break;
 
-            default: // Too many arguments.
-            const messageString = "Too many arguments for command `ping`!"
-            this.sendError(messageString);
+            default:
+            this.sendSentTooManyArgumentsError();
             break;
         }
     }

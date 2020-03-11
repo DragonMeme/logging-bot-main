@@ -26,12 +26,11 @@ client.on("ready", async () => {
     The main place to supposedly run commands by users.
 */
 client.on("message", async (message) => {
+    if(message.channel.type != "text") return;
     if(!message.content.startsWith(prefix)) return;
     if(message.author.bot) return;
-    if(client.user.presence.status != "online") {
-        if(message.author.id != author) {
-            return;
-        }
+    if(client.user.presence.status != "available") {
+        if(message.author.id != author) return;
     }
     command.processCommand(message, client);
 });
@@ -48,7 +47,7 @@ client.on("guildCreate", async (guild) => {
         if(guild.ownerID != author){
             guild.leave();
             console.log(`Automatically left Guild (ID: ${guildID})`)
-            return;
+            return; // Do not add guild to database.
         }
     }
     database.createGuild([guildID]);
@@ -61,10 +60,7 @@ client.on("guildCreate", async (guild) => {
 client.on("guildDelete", async (guild) => {
     const guildID = guild.id;
     console.log(`\nLeft guild (ID: ${guildID})`)
-    if(!database.readGuild(guildID, "G")){
-        // Do not perform delete if guild id entry does not exist in database.
-        return; 
-    }
+    if(!database.readGuild(guildID, "G")) return; 
     database.deleteGuild([guildID]);
 });
 

@@ -20,9 +20,7 @@ exports.selectCategory = function(category){
 }
 exports.grabAllHeaderValues = function(){
     let arr = [];
-    for(let s in jsonKeysSettingTypes){
-        arr.push(jsonData["Setting Types"][s]["min"]);
-    }
+    for(let s in jsonKeysSettingTypes) arr.push(jsonData["Setting Types"][s]["min"]);
     return arr;
 }
 

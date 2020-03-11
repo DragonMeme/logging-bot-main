@@ -20,9 +20,7 @@ module.exports = class help extends Command{
             .setColor("#00FFFF")
             .setTitle("Hyo Bot Help! (Click here to join the support server)")
             .setDescription(this.getMainDescription());
-            if(process.env.MAIN_SERVER_LINK != null){
-                embed.setURL(process.env.MAIN_SERVER_LINK);
-            }
+            if(process.env.MAIN_SERVER_LINK != null) embed.setURL(process.env.MAIN_SERVER_LINK);
             this.jsonValuesHelpArguments.forEach(
                 argument => {
                     const usage = this.getParameter(argument, "Usage");
@@ -58,9 +56,7 @@ module.exports = class help extends Command{
                         showExampleString += `\`${this.prefix}${example}\`\n`;
                     }
                 );
-                if(showExamples.length > 0){
-                    embed.addField(`Example${showExamples.length === 1 ? "":"s"}`, showExampleString);
-                }
+                if(showExamples.length > 0) embed.addField(`Example${showExamples.length === 1 ? "":"s"}`, showExampleString);
                 this.message.author.send(embed);
             }else{ // Unsupported commands for user.
                 const messageString = `Sorry, I do not process command \`${secondArgument}\``;
@@ -68,23 +64,20 @@ module.exports = class help extends Command{
             }
             break;
 
-            default: // Too many arguments.
-            const messageString = "Too many arguments for command `help`!";
-            sendError(messageString);
+            default:
+            this.sendSentTooManyArgumentsError();
             break;
         }
     }
 
     getMainDescription(){
-        return "Arguments closed with `[]` are optional.\n" + 
-        "Arguments closed with `<>` are required.\n" + 
+        return "Arguments closed with `[]` are optional.\nArguments closed with `<>` are required.\n" + 
         `Do not add \`[]\` and \`<>\` to your arguments (e.g. \`${this.prefix}setlog user_deletes on\`).`;
     }
 
     getParameter(argument, parameter){
-        if(!this.jsonData[argument][parameter]){
-            return null;
-        }else{
+        if(!this.jsonData[argument][parameter])return null;
+        else{
             let constructActivityDescription = this.jsonData[argument][parameter];
             if(argument === "quicksetlog"){ // Special case for quicksetlog.
                 if(parameter === "<option>"){

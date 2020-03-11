@@ -5,6 +5,11 @@ module.exports = class Command{
         this.otherArguments = argumentList.slice(1);
     }
 
+    sendSentTooManyArgumentsError(){
+        const messageString = `Too many arguments for command \`${this.firstArgument}\`!`;
+        this.sendError(messageString);
+    }
+
     sendError(errorMessage){
         this.message.channel.send(errorMessage).then(
             sent => {
