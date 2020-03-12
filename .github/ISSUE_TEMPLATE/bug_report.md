@@ -10,7 +10,7 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
-**To Reproduce (Can be combined with description if steps are small)**
+**To Reproduce Error:**
 Steps to reproduce the behaviour:
 1. Type command '...'
 2. See error
