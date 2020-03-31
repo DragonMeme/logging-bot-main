@@ -1,13 +1,12 @@
 const database = require("./database.js");
-const discord = require("discord.js");
+const { Client, Collection } = require("discord.js");
 const fs = require("fs");
 
-require("dotenv").config();
 const prefix = process.env.PREFIX;
 const botAuthor = process.env.AUTHOR_ID;
 
-const client = new discord.Client();
-client.commands = new discord.Collection();
+const client = new Client();
+client.commands = new Collection();
 fs.readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
     file => {
         const command = require(`./commands/${file}`);
@@ -26,7 +25,7 @@ client.on("ready", async () => {
     console.log("Loading bot!")
     database.initDB(client);
     client.user.setStatus("available");
-    client.user.setActivity(`type ${prefix}help`,  "PLAYING");
+    client.user.setActivity(`${prefix}help`,  "PLAYING");
     console.log(`\nLogged in as ${client.user.tag}!`);
 });
 
@@ -45,6 +44,7 @@ client.on("message", async (message) => {
     if(!client.commands.has(firstArgument)) return;
     const command = client.commands.get(firstArgument);
     const otherArguments = listVariables.slice(1);
+    const invalidPermissionsString = `<@${message.author.id}>, You have insufficient permissions to run this command.`;
     switch(command.permissionLevel){
         case 0: // Normal User
         command.execute(message, otherArguments);
@@ -52,12 +52,12 @@ client.on("message", async (message) => {
 
         case 1: // Moderator
         if(isModerator(message)) command.execute(message, otherArguments);
-        else message.channel.send(`<@${message.author.id}>, You have insufficient permissions to run this command.`);
+        else message.channel.send(invalidPermissionsString);
         break;
 
         case 2: // Administrator
         if(isAdministrator(message)) command.execute(message, otherArguments);
-        else message.channel.send(`<@${message.author.id}>, You have insufficient permissions to run this command.`);
+        else message.channel.send(invalidPermissionsString);
         break;
 
         case 3: // Bot Author

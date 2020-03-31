@@ -14,7 +14,7 @@
   },
   "scripts": {
     "test": "mocha src/main.test.js --exit --timeout 10000",
-    "start": "node src/main.js"
+    "start": "node -r dotenv/config src/main.js"
   },
   "repository": {
     "type": "git",
