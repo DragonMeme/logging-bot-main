@@ -7,6 +7,7 @@ module.exports = {
     permissionLevel: 0,
     parameters: {},
     execute(message, otherArguments){
+        if(!["text", "dm"].includes(message.channel.type)) return;
         switch(otherArguments.length){
             case 0: // No other arguments needed.
             message.react("🤔").then(
@@ -16,8 +17,7 @@ module.exports = {
                         .setColor("#00FFFF")
                         .setTitle("Click here to invite me!")
                         .setURL(`https://discordapp.com/api/oauth2/authorize?client_id=${clientID}&permissions=268495958&scope=bot`);
-                    message.author.send(embed);
-                        
+                    message.author.send(embed);   
                 }
             );
             break;
