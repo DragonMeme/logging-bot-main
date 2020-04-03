@@ -1,28 +1,21 @@
-guildSettingTableClass = require("./class/guild_settings_table.js");
+guildSettingTableClass = require("./table/guild_settings_table.js");
 guildSettingCommon = require("./common/guild_setting.js");
-
-require("dotenv").config();
 
 const author = process.env.AUTHOR_ID;
 const guildSettingTable = new guildSettingTableClass("Server Settings", true);
 const guildIDTitle = guildSettingCommon.selectSettings("G");
 
+// Ensure that the only guild to be added are the ones that the bot owner owns or has more than 50 human users.
 exports.initDB = function(client){
     let listGuildID = [];
     let guildToAddToDatabase = [];
-    
     client.guilds.forEach(
         guild => {// Ensure to only add guilds that meet the pre-requisites.
             let guildID = guild.id;
             if(guild.members.filter(member => !member.user.bot).size < 50){
-                if(guild.ownerID == author){ // The bot author is the only exception.
-                    listGuildID.push(guildID);
-                }else{
-                    guild.leave();
-                }
-            }else{
-                listGuildID.push(guildID);
-            }
+                if(guild.ownerID == author) listGuildID.push(guildID); 
+                else guild.leave();
+            }else listGuildID.push(guildID);
         }
     );
     console.log("\nLooking for missing servers to add to database.");
@@ -41,9 +34,7 @@ function pruneServerSettingsDB(updatedList){
     listGuildsInDatabase = guildSettingTable.readAllGuild();
     listGuildsInDatabase.forEach(guild => {
         let guildID  = guild[`${guildIDTitle}`];
-        if(!updatedList.includes(guildID)){
-            guildSettingTable.deleteGuild([guildID]);
-        }
+        if(!updatedList.includes(guildID)) guildSettingTable.deleteGuild([guildID]);
     });
     console.log("Servers successfully removed.");
 }

@@ -14,11 +14,11 @@
   },
   "scripts": {
     "test": "mocha src/main.test.js --exit --timeout 10000",
-    "start": "node src/main.js"
+    "start": "node -r dotenv/config src/main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DragonMeme/log-bot.git"
+    "url": "git+https://github.com/DragonMeme/logging-bot-main.git"
   },
   "keywords": [
     "Javascript",
@@ -28,7 +28,7 @@
   "author": "DragonMeme",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DragonMeme/log-bot/issues"
+    "url": "https://github.com/DragonMeme/logging-bot-main/issues"
   },
-  "homepage": "https://github.com/DragonMeme/log-bot#readme"
+  "homepage": "https://github.com/DragonMeme/logging-bot-main#readme"
 }

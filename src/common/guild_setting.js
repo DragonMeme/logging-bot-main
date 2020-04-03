@@ -1,10 +1,10 @@
 // The contents of guild_setting.json should not change while the program is running.
 const jsonData = require("./guild_setting.json");
 // For reading activity types.
-const jsonKeysSettingValues = Object.keys(jsonData["Setting Values"]);
-const jsonValuesSettingValues = Object.values(jsonData["Setting Values"]);
+const jsonKeysSettingValues = Object.keys(jsonData["SettingValues"]);
+const jsonValuesSettingValues = Object.values(jsonData["SettingValues"]);
 // For reading activity categories
-const jsonKeysSettingTypes = Object.keys(jsonData["Setting Types"]);
+const jsonKeysSettingTypes = Object.keys(jsonData["SettingTypesIndexes"]);
 
 /*
     Export the requested value based on given key.
@@ -12,17 +12,15 @@ const jsonKeysSettingTypes = Object.keys(jsonData["Setting Types"]);
 // Check that the settings exist, otherwise return guild id by default.
 exports.selectSettings = function(setting){
     return jsonKeysSettingValues.includes(setting) ? 
-        jsonData["Setting Values"][setting] : jsonData["Default Setting Value"];
+        jsonData["SettingValues"][setting] : jsonData["DefaultSettingValue"];
 }
 // Check that the category exists, return null if non existent.
 exports.selectCategory = function(category){
-    return jsonKeysSettingTypes.includes(category) ? jsonData["Setting Types"][category] : null;
+    return jsonKeysSettingTypes.includes(category) ? jsonData["SettingTypesIndexes"][category] : null;
 }
 exports.grabAllHeaderValues = function(){
     let arr = [];
-    for(let s in jsonKeysSettingTypes){
-        arr.push(jsonData["Setting Types"][s]["min"]);
-    }
+    for(let s in jsonKeysSettingTypes) arr.push(jsonData["SettingTypesIndexes"][s]["min"]);
     return arr;
 }
 
@@ -30,7 +28,7 @@ exports.grabAllHeaderValues = function(){
     Export possible values.
 */
 // For fetching headers for statuslog
-exports.listHeadersForStatusLog = jsonData["Status Headers"];
+exports.listHeadersForStatusLog = jsonData["StatusHeaders"];
 // Export Setting Values Parameters.
 exports.listKeysSettingValues = jsonKeysSettingValues;
 exports.listValuesSettingValues = jsonValuesSettingValues;
