@@ -1,8 +1,6 @@
 guildSettingTableClass = require("./table/guild_settings_table.js");
 guildSettingCommon = require("./common/guild_setting.js");
 
-require("dotenv").config();
-
 const author = process.env.AUTHOR_ID;
 const guildSettingTable = new guildSettingTableClass("Server Settings", true);
 const guildIDTitle = guildSettingCommon.selectSettings("G");
