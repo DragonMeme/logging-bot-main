@@ -44,20 +44,27 @@ client.on("message", async (message) => {
     if(!client.commands.has(firstArgument)) return;
     const command = client.commands.get(firstArgument);
     const otherArguments = message.content.startsWith(prefix) ? listVariables.slice(1) : listVariables.slice(2);
-    const invalidPermissionsString = `<@${message.author.id}>, You have insufficient permissions to run this command.`;
     switch(command.permissionLevel){
         case 0: // Normal User
         command.execute(message, otherArguments);
         break;
 
         case 1: // Moderator
+        if(message.channel.type == "dm"){
+            message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
+            return;
+        }
         if(isModerator(message)) command.execute(message, otherArguments);
-        else message.channel.send(invalidPermissionsString);
+        else message.reply("You have insufficient permissions to run this command.");
         break;
 
         case 2: // Administrator
+        if(message.channel.type == "dm"){
+            message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
+            return;
+        }
         if(isAdministrator(message)) command.execute(message, otherArguments);
-        else message.channel.send(invalidPermissionsString);
+        else message.reply("You have insufficient permissions to run this command.");
         break;
 
         case 3: // Bot Author
@@ -106,10 +113,10 @@ client.login(process.env.BOT_TOKEN).catch(error => console.log(error));
 function isModerator(message){
     const member = message.guild.members.find(member => member.id === message.author.id);
     let permissionLevel = 0;
-    if(member.hasPermission(0x2)) permissionLevel++; // Kick Member
-    if(member.hasPermission(0x4)) permissionLevel++; // Ban Member
-    if(member.hasPermission(0x2000)) permissionLevel++; // Manage Messages
-    if(member.hasPermission(0x8000000)) permissionLevel++; // Manage Nicknames
+    if(member.hasPermission(0x2)) ++permissionLevel; // Kick Member
+    if(member.hasPermission(0x4)) ++permissionLevel; // Ban Member
+    if(member.hasPermission(0x2000)) ++permissionLevel; // Manage Messages
+    if(member.hasPermission(0x8000000)) ++permissionLevel; // Manage Nicknames
     return permissionLevel > 2;
 }
 
@@ -117,10 +124,10 @@ function isAdministrator(message){
     if(isModerator(message)){
         const member = message.guild.members.find(member => member.id === message.author.id);
         let permissionLevel = 0;
-        if(member.hasPermission(0x8)) permissionLevel++; // Administrator (not required)
-        if(member.hasPermission(0x10)) permissionLevel++; // Manage Channels
-        if(member.hasPermission(0x20)) permissionLevel++; // Manage Guild
-        if(member.hasPermission(0x10000000)) permissionLevel++; // Manage Roles
+        if(member.hasPermission(0x8)) ++permissionLevel; // Administrator (not required)
+        if(member.hasPermission(0x10)) ++permissionLevel; // Manage Channels
+        if(member.hasPermission(0x20)) ++permissionLevel; // Manage Guild
+        if(member.hasPermission(0x10000000)) ++permissionLevel; // Manage Roles
         return permissionLevel > 2;
     }else return false;
 }

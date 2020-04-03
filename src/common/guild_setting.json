@@ -1,6 +1,6 @@
 {
-    "Default Setting Value" : "Guild ID",
-    "Setting Values" : {
+    "DefaultSettingValue" : "Guild ID",
+    "SettingValues" : {
         "UJ":"User Joins",
         "UL":"User Leaves",
         "UMD":"User Message Deletes",
@@ -17,7 +17,7 @@
 
         "MR":"Muted Role"
     },
-    "Setting Types" : {
+    "SettingTypesIndexes" : {
         "all":{
             "max":11,
             "min":0
@@ -35,7 +35,7 @@
             "min":9
         }
     },
-    "Status Headers":{
+    "StatusHeaders":{
         "0":"User Activities",
         "6":"Channel Activities",
         "9":"Moderator Activities"
