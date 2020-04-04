@@ -1,12 +1,11 @@
 const sqlite3 = require("better-sqlite3");
 const { DefaultSettingValue, SettingValues } = require("../common/guild_setting.json");
 const { existsSync, mkdirSync } = require("fs");
-const dir = "./data";
 
 module.exports = class Guild_Setting{
     constructor(tableName){
         this.tableName = tableName;
-        if (!existsSync(dir)) mkdirSync(dir);
+        if (!existsSync("./data")) mkdirSync("./data");
         const settingValuesFormat = Object.values(SettingValues).join("\" TEXT, \"");
         let sql = `CREATE TABLE IF NOT EXISTS "${tableName}"("`
         sql += `${DefaultSettingValue}" TEXT UNIQUE NOT NULL, "${settingValuesFormat}" TEXT)`;

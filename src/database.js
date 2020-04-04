@@ -3,6 +3,7 @@ const { DefaultSettingValue } = require("./common/guild_setting.json");
 
 const author = process.env.AUTHOR_ID;
 const guildSettingTable = new Guild_Setting("Server Settings");
+let invalidGuildList = [];
 
 exports.initialise = function(client){
     const listGuildID = [];
@@ -11,17 +12,20 @@ exports.initialise = function(client){
         The bot will automatically leave any server that does not meet the requisites.
         As for the guilds that meet the requisites, the id is added to listGuildID.
     */
-   console.log("=> Looking for missing servers to add to database.");
+    console.log("=> Looking for missing servers to add to database.");
     client.guilds.forEach(
         guild => {
             const guildID = guild.id;
             if(guild.members.filter(member => !member.user.bot).size < 50){
                 if(guild.ownerID == author) listGuildID.push(guildID); 
-                else guild.leave();
+                else {
+                    invalidGuildList.push(guildID);
+                    console.log(`Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
+                }
             }else listGuildID.push(guildID);
         }
     );
-    console.log("All guilds that the bot is in have been searched and has left any servers that does not meet requisites!\n");
+    console.log("All guilds the bot is in is checked and will leave servers that do not meet pre-requisites!\n");
     
     /*
         Check the database and see whether the entry from listGuildID exists or not.
@@ -50,6 +54,12 @@ exports.initialise = function(client){
     });
     console.log("Guilds have been successfully pruned!\n");
 };
+
+exports.invalidGuildList = function(){
+    const resultList = invalidGuildList;
+    invalidGuildList = [];
+    return resultList;
+}
 
 /*
     CRUD Commands.
