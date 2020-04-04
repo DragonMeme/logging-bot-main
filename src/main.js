@@ -1,4 +1,4 @@
-const database = require("./database.js");
+const { createData, deleteData, initialise, readData } = require("./database.js");
 const { Client, Collection } = require("discord.js");
 const { readdirSync } = require("fs");
 
@@ -18,14 +18,24 @@ readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
     When the bot is set-up for the first time, a database is created.
     Otherwise refresh database by updating servers the bot is in.
 */
-client.on("ready", async () => {
-    client.user.setStatus("dnd");
-    client.user.setActivity("Loading...",  "PLAYING");
-    console.log("Loading bot!");
-    database.initDB(client);
-    client.user.setStatus("available");
-    client.user.setActivity(`${prefix}help | @${client.user.username} help`,  "PLAYING");
-    console.log(`\nLogged in as ${client.user.tag}!`);
+client.once("ready", async () => {
+    client.user.setPresence({
+        game: { 
+            name: "Loading..." 
+        }, 
+        status: "dnd"
+    }).then(() => {
+        console.log("==> Loading bot info and data!");
+        initialise(client);
+    }).then(() => {
+        client.user.setPresence({
+            game:{ 
+                name: `${prefix}help | @${client.user.username} help` 
+            }, 
+            status: "online"
+        })
+        console.log(`==> Loaded and logged in as ${client.user.tag}!`);
+    });
 });
 
 /*
@@ -36,7 +46,7 @@ client.on("message", async (message) => {
 
     // Ensure bot would respond either with prefix or with a proper mention.
     if(!message.content.match(new RegExp(`^(${prefix}|<@${client.user.id}> |<@!${client.user.id}> )`))) return;
-    if(client.user.presence.status != "available"){
+    if(!["available", "online"].includes(client.user.presence.status)){
         if(message.author.id != botAuthor) return;
     }
     const listVariables = message.content.toLowerCase().slice(prefix.length).split(" ");
@@ -83,15 +93,15 @@ client.on("message", async (message) => {
 */
 client.on("guildCreate", async (guild) => {
     const guildID = guild.id;
-    console.log(`\nGuild ID ${guildID} attempted to add bot to server.`);
+    console.log(`Guild ID ${guildID} attempted to add bot to server.`);
     if(guild.members.filter(member => !member.user.bot).size < 50){
         if(guild.ownerID != botAuthor){
             guild.leave();
-            console.log(`Automatically left Guild (ID: ${guildID})`)
+            console.log(`Automatically left Guild (ID: ${guildID})`);
             return; // Do not add guild to database.
         }
     }
-    database.createGuild([guildID]);
+    createData([guildID]);
 });
 
 /* 
@@ -100,9 +110,8 @@ client.on("guildCreate", async (guild) => {
 */
 client.on("guildDelete", async (guild) => {
     const guildID = guild.id;
-    console.log(`\nLeft guild (ID: ${guildID})`)
-    if(!database.readGuild(guildID, "G")) return; 
-    database.deleteGuild([guildID]);
+    console.log(`\nLeft guild (ID: ${guildID})`);
+    if(readData(guildID, "G") != null) deleteData([guildID]);
 });
 
 client.login(process.env.BOT_TOKEN).catch(error => console.log(error));
