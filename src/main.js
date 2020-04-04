@@ -1,49 +1,73 @@
-const database = require("./database.js");
+const { createData, deleteData, initialise, invalidGuildList, readData } = require("./database.js");
 const { Client, Collection } = require("discord.js");
-const { readdirSync } = require("fs");
+const { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } = require("fs");
 
 const prefix = process.env.PREFIX;
 const botAuthor = process.env.AUTHOR_ID;
-
 const client = new Client();
 client.commands = new Collection();
-readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
-    file => {
-        const command = require(`./commands/${file}`);
-        client.commands.set(command.name, command);
-    }
-);
 
 /*
     When the bot is set-up for the first time, a database is created.
     Otherwise refresh database by updating servers the bot is in.
+    Ensure bot is only in servers that meet the pre-requisites.
 */
-client.on("ready", async () => {
-    client.user.setStatus("dnd");
-    client.user.setActivity("Loading...",  "PLAYING");
-    console.log("Loading bot!");
-    database.initDB(client);
-    client.user.setStatus("available");
-    client.user.setActivity(`${prefix}help | @${client.user.username} help`,  "PLAYING");
-    console.log(`\nLogged in as ${client.user.tag}!`);
+client.once("ready", async () => {
+    await client.user.setPresence({
+        game: { 
+            name: "Loading..." 
+        }, 
+        status: "dnd"
+    }); 
+    console.log("==> Loading bot info and data!");
+    if (!existsSync("./data")) mkdirSync("./data");
+    readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
+        file => {
+            const command = require(`./commands/${file}`);
+            client.commands.set(command.name, command);
+        }
+    );
+    console.log("=> Attempting to get bot invite link!");
+    try{ 
+        if(!JSON.parse(readFileSync("./data/config.json").toString()).invite) 
+            throw Error("Missing Invite Link! Now it is being generated!");
+        console.log("The stored invite link has been found.\n")
+    }catch(e){
+        await client.generateInvite(0x1000EC56).then(link => {
+            writeFileSync("./data/config.json", JSON.stringify({invite: link}, null, 4));
+            console.log("Invite link not found, but has been generated and stored!\n");
+        }).catch(err => console.log(err.message));
+    }
+    initialise(client);
+    await client.user.setPresence({
+        game:{ 
+            name: `${prefix}help | @${client.user.username} help` 
+        }, 
+        status: "online"
+    });
+    console.log(`==> Loaded and logged in as ${client.user.tag}!`);
+
+    invalidGuildList().forEach(guildID => client.guilds.find(guild => guild.id === guildID).leave());
 });
 
 /*
     The main place to supposedly run commands by users.
+    Also the most commonly occuring event for the bot to respond to.
 */
 client.on("message", async (message) => {
     if(message.author.bot) return;
 
     // Ensure bot would respond either with prefix or with a proper mention.
     if(!message.content.match(new RegExp(`^(${prefix}|<@${client.user.id}> |<@!${client.user.id}> )`))) return;
-    if(client.user.presence.status != "available"){
+    if(!["available", "online"].includes(client.user.presence.status)){
         if(message.author.id != botAuthor) return;
     }
+    const startsWithPrefix = message.content.startsWith(prefix);
     const listVariables = message.content.toLowerCase().slice(prefix.length).split(" ");
-    const firstArgument = message.content.startsWith(prefix) ? listVariables[0] : listVariables[1];
+    const firstArgument = startsWithPrefix ? listVariables[0] : listVariables[1];
     if(!client.commands.has(firstArgument)) return;
     const command = client.commands.get(firstArgument);
-    const otherArguments = message.content.startsWith(prefix) ? listVariables.slice(1) : listVariables.slice(2);
+    const otherArguments = startsWithPrefix ? listVariables.slice(1) : listVariables.slice(2);
     switch(command.permissionLevel){
         case 0: // Normal User
         command.execute(message, otherArguments);
@@ -83,15 +107,14 @@ client.on("message", async (message) => {
 */
 client.on("guildCreate", async (guild) => {
     const guildID = guild.id;
-    console.log(`\nGuild ID ${guildID} attempted to add bot to server.`);
+    console.log(`Guild ID ${guildID} attempted to add bot to server.`);
     if(guild.members.filter(member => !member.user.bot).size < 50){
         if(guild.ownerID != botAuthor){
             guild.leave();
-            console.log(`Automatically left Guild (ID: ${guildID})`)
             return; // Do not add guild to database.
         }
     }
-    database.createGuild([guildID]);
+    createData([guildID]);
 });
 
 /* 
@@ -100,9 +123,8 @@ client.on("guildCreate", async (guild) => {
 */
 client.on("guildDelete", async (guild) => {
     const guildID = guild.id;
-    console.log(`\nLeft guild (ID: ${guildID})`)
-    if(!database.readGuild(guildID, "G")) return; 
-    database.deleteGuild([guildID]);
+    console.log(`Left guild (ID: ${guildID})`);
+    if(readData(guildID, "G") != null) deleteData([guildID]);
 });
 
 client.login(process.env.BOT_TOKEN).catch(error => console.log(error));
