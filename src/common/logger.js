@@ -1,5 +1,5 @@
-module.exports = class Logger{
-    static logTime(message){
+module.exports = {
+    logTime: function(message){
         const dateObject = new Date(Date.now());
         const year = dateObject.getFullYear();
         const month = numberString(2, dateObject.getMonth() + 1);
@@ -11,7 +11,6 @@ module.exports = class Logger{
         const date = `${year}/${month}/${day}`;
         const time = `${hour}:${minute}:${second}`;
         const dateTime = `${date} ${time}-${millisecond}`;
-
         return console.log(`${dateTime} ${message}`);
     }
 }

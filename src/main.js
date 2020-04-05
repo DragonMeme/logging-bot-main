@@ -2,9 +2,9 @@ const { createData, deleteData, initialise, invalidGuildList, readData } = requi
 const { Client, Collection } = require("discord.js");
 const { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } = require("fs");
 const { logTime } = require("./common/logger.js");
+const { isModerator, isAdministrator, isBotOwner, isGuildOwner } = require("./common/permissionCheck.js");
 
 const prefix = process.env.PREFIX;
-const botAuthor = process.env.AUTHOR_ID;
 const client = new Client();
 client.commands = new Collection();
 let initialised = false;
@@ -63,8 +63,8 @@ client.on("ready", async () => {
             status: "online"
         });
         logTime(`==> Loaded and logged in as ${client.user.tag}!`);
-
-        invalidGuildList.forEach(guildID => client.guilds.find(guild => guild.id === guildID).leave());
+        
+        invalidGuildList().forEach(guildID => client.guilds.find(guild => guild.id === guildID).leave());
     }
 });
 
@@ -79,7 +79,7 @@ client.on("message", async (message) => {
     const prefixRegex = new RegExp(`^(${prefix}|<@${client.user.id}> |<@!${client.user.id}> )`);
     if(!message.content.match(prefixRegex)) return undefined;
     if(!["available", "online"].includes(client.user.presence.status)){
-        if(message.author.id != botAuthor) return undefined;
+        if(!isBotOwner(message)) return undefined;
     }
     const startsWithPrefix = message.content.startsWith(prefix);
     const listVariables = message.content.toLowerCase().slice(prefix.length).split(" ");
@@ -106,7 +106,7 @@ client.on("message", async (message) => {
         else return message.reply("You have insufficient permissions to run this command.");
 
         case 3: // Bot Author
-        if(message.author.id == botAuthor) return command.execute(message, otherArguments);
+        if(isBotOwner(message)) return command.execute(message, otherArguments);
 
         default:
         return undefined;
@@ -122,7 +122,7 @@ client.on("guildCreate", async (guild) => {
     const guildID = guild.id;
     logTime(`    Guild ID ${guildID} attempted to add bot to server.`);
     if(guild.members.filter(member => !member.user.bot).size < 50){
-        if(guild.ownerID != botAuthor) return guild.leave(); // Do not add guild to database.
+        if(!isGuildOwner(guild, "owner")) return guild.leave(); // Do not add guild to database.
     }
     createData([guildID]);
 });
@@ -154,28 +154,3 @@ client.on("error", error => logTime(error.message));
 client.on("warn", info => logTime(info));
 
 client.login(process.env.BOT_TOKEN).catch(error => logTime(error));
-
-/*
-    HELPER FUNCTIONS
-*/
-function isModerator(message){
-    const member = message.guild.members.find(member => member.id === message.author.id);
-    let permissionLevel = 0;
-    if(member.hasPermission(0x2)) ++permissionLevel; // Kick Member
-    if(member.hasPermission(0x4)) ++permissionLevel; // Ban Member
-    if(member.hasPermission(0x2000)) ++permissionLevel; // Manage Messages
-    if(member.hasPermission(0x8000000)) ++permissionLevel; // Manage Nicknames
-    return permissionLevel > 2;
-}
-
-function isAdministrator(message){
-    if(isModerator(message)){
-        const member = message.guild.members.find(member => member.id === message.author.id);
-        let permissionLevel = 0;
-        if(member.hasPermission(0x8)) ++permissionLevel; // Administrator (not required)
-        if(member.hasPermission(0x10)) ++permissionLevel; // Manage Channels
-        if(member.hasPermission(0x20)) ++permissionLevel; // Manage Guild
-        if(member.hasPermission(0x10000000)) ++permissionLevel; // Manage Roles
-        return permissionLevel > 2;
-    }else return false;
-}
