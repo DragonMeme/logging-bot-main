@@ -1,5 +1,6 @@
 const Guild_Setting = require("./table/guild_settings.js");
 const { DefaultSettingValue } = require("./common/guild_setting.json");
+const { logTime } = require("./common/logger.js")
 
 const author = process.env.AUTHOR_ID;
 const guildSettingTable = new Guild_Setting("Server Settings");
@@ -12,7 +13,7 @@ exports.initialise = function(client){
         The bot will automatically leave any server that does not meet the requisites.
         As for the guilds that meet the requisites, the id is added to listGuildID.
     */
-    console.log("=> Looking for missing servers to add to database.");
+    logTime("=>  Looking for missing servers to add to database.");
     client.guilds.forEach(
         guild => {
             const guildID = guild.id;
@@ -20,46 +21,42 @@ exports.initialise = function(client){
                 if(guild.ownerID == author) listGuildID.push(guildID); 
                 else {
                     invalidGuildList.push(guildID);
-                    console.log(`Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
+                    logTime(`    Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
                 }
             }else listGuildID.push(guildID);
         }
     );
-    console.log("All guilds the bot is in is checked and will leave servers that do not meet pre-requisites!\n");
+    logTime("    All guilds that the bot is in has been checked and some may leave servers!");
     
     /*
         Check the database and see whether the entry from listGuildID exists or not.
         Add missing GuildID to database if needed.
     */
-   console.log("=> Attempting to add missing guilds to the database.");
+   logTime("=>  Attempting to add missing guilds to the database.");
     listGuildID.forEach(guild => {
         if(guildSettingTable.readData(guild, "G") == null){
             guildSettingTable.createData([guild]);
-            console.log(`${DefaultSettingValue}: ${guild} was not in database. It is now added!`);
+            logTime(`    ${DefaultSettingValue}: ${guild} was not in database. It is now added!`);
         }
     });
-    console.log("New servers successfully added to database.\n");
+    logTime("    New servers successfully added to database.");
 
     /*
         Prune any guild in the database that the the bot is no longer part of.
         This is used to save space.
     */
-    console.log("=> Removing any server that the bot is currently not in.");
+    logTime("=>  Removing any server information that the bot is currently not in from database.");
     guildSettingTable.readDataBase().forEach(guild => {
         let guildID  = guild[`${DefaultSettingValue}`];
         if(!listGuildID.includes(guildID)) {
             guildSettingTable.deleteData([guildID]);
-            console.log(`${DefaultSettingValue}: ${guildID} is now removed from the database.`);
+            logTime(`${DefaultSettingValue}: ${guildID} is removed from the database.`);
         }
     });
-    console.log("Guilds have been successfully pruned!\n");
+    logTime("    Redundant guild information have been successfully pruned from database!");
 };
 
-exports.invalidGuildList = function(){
-    const resultList = invalidGuildList;
-    invalidGuildList = [];
-    return resultList;
-}
+exports.invalidGuildList = invalidGuildList.splice(0, invalidGuildList.length);
 
 /*
     CRUD Commands.
