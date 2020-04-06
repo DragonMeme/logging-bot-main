@@ -1,5 +1,5 @@
 const { readdirSync } = require("fs");
-const { isBotOwner } = require("../common/permissionCheck.js")
+const { isBotOwner } = require("../common/permission_check.js")
 
 module.exports = {
     name: "help",

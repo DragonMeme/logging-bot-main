@@ -1,5 +1,5 @@
 module.exports = {
-    logTime: function(message){
+    consoleLogTime: function(message){
         const dateObject = new Date(Date.now());
         const year = dateObject.getFullYear();
         const month = numberString(2, dateObject.getMonth() + 1);

@@ -1,8 +1,8 @@
 const { createData, deleteData, initialise, invalidGuildList, readData } = require("./database.js");
 const { Client, Collection } = require("discord.js");
 const { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } = require("fs");
-const { logTime } = require("./common/logger.js");
-const { isModerator, isAdministrator, isBotOwner, isGuildOwner } = require("./common/permissionCheck.js");
+const { consoleLogTime } = require("./common/logger.js");
+const { isModerator, isAdministrator, isBotOwner, isGuildOwner } = require("./common/permission_check.js");
 
 const prefix = process.env.PREFIX;
 const client = new Client();
@@ -16,7 +16,7 @@ let initialised = false;
 */
 client.on("ready", async () => {
     if(initialised){
-        logTime(`==> Reconnected and ready as ${client.user.tag}`);
+        consoleLogTime(`==> Reconnected and ready as ${client.user.tag}`);
     }else{
         await client.user.setPresence({
             game: { 
@@ -24,7 +24,7 @@ client.on("ready", async () => {
             }, 
             status: "dnd"
         }); 
-        logTime("==> Loading bot info and data!");
+        consoleLogTime("==> Loading bot info and data!");
         if (!existsSync("./data")) mkdirSync("./data");
         readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
             file => {
@@ -32,28 +32,28 @@ client.on("ready", async () => {
                 client.commands.set(command.name, command);
             }
         );
-        logTime("=>  Attempting to get bot invite link!");
+        consoleLogTime("=>  Attempting to get bot invite link!");
         try{ 
             const configJSON = JSON.parse(readFileSync("./data/config.json").toString());
             if(!configJSON.invite) 
                 throw Error("Missing Invite Link! Now it is being generated!");
             else{
-                logTime("The stored invite link has been found.");
+                consoleLogTime("The stored invite link has been found.");
 
                 // Ensure invite link in config.json not tampered with/outdated.
                 await client.generateInvite(0x1000EC56).then(link => {
-                    if(link === configJSON.invite) logTime("Invite link currently up-to-date!");
+                    if(link === configJSON.invite) consoleLogTime("Invite link currently up-to-date!");
                     else{
                         writeFileSync("./data/config.json", JSON.stringify({invite: link}, null, 4));
-                        logTime("Invite link outdated, replaced with up-to-date link!");
+                        consoleLogTime("Invite link outdated, replaced with up-to-date link!");
                     }
-                }).catch(err => logTime(err.message));
+                }).catch(err => consoleLogTime(err.message));
             }
         }catch(e){ // Unable to find JSON item.
             await client.generateInvite(0x1000EC56).then(link => {
                 writeFileSync("./data/config.json", JSON.stringify({invite: link}, null, 4));
-                logTime("Invite link not found, but has been generated and stored!");
-            }).catch(err => logTime(err.message));
+                consoleLogTime("Invite link not found, but has been generated and stored!");
+            }).catch(err => consoleLogTime(err.message));
         }
         initialise(client);
         await client.user.setPresence({
@@ -62,7 +62,7 @@ client.on("ready", async () => {
             }, 
             status: "online"
         });
-        logTime(`==> Loaded and logged in as ${client.user.tag}!`);
+        consoleLogTime(`==> Loaded and logged in as ${client.user.tag}!`);
         
         invalidGuildList().forEach(guildID => client.guilds.find(guild => guild.id === guildID).leave());
     }
@@ -129,7 +129,7 @@ client.on("message", async (message) => {
 */
 client.on("guildCreate", async (guild) => {
     const guildID = guild.id;
-    logTime(`Guild ID ${guildID} attempted to add bot to server.`);
+    consoleLogTime(`Guild ID ${guildID} attempted to add bot to server.`);
     if(guild.members.filter(member => !member.user.bot).size < 50){
         if(!isGuildOwner(guild, "owner")) return guild.leave(); // Do not add guild to database.
     }
@@ -142,7 +142,7 @@ client.on("guildCreate", async (guild) => {
 */
 client.on("guildDelete", async (guild) => {
     const guildID = guild.id;
-    logTime(`Left guild (ID: ${guildID})`);
+    consoleLogTime(`Left guild (ID: ${guildID})`);
     if(readData(guildID, "G") != null) deleteData([guildID]);
 });
 
@@ -153,14 +153,14 @@ client.on("userUpdate", (oldUser, newUser) => {
                 name: `${prefix}help | @${newUser.username} help` 
             }
         }).then(() => {
-            logTime(`My username has been changed to ${client.user.username}`);
+            consoleLogTime(`My username has been changed to ${client.user.username}`);
         });
     }
 });
 
-client.on("debug", info => logTime(info));
-client.on("disconnect", () => logTime("==> I have disconnected!"));
-client.on("error", error => logTime(error.message));
-client.on("warn", info => logTime(info));
+client.on("debug", info => consoleLogTime(info));
+client.on("disconnect", () => consoleLogTime("==> I have disconnected!"));
+client.on("error", error => consoleLogTime(error.message));
+client.on("warn", info => consoleLogTime(info));
 
-client.login(process.env.BOT_TOKEN).catch(error => logTime(`${error}`));
+client.login(process.env.BOT_TOKEN).catch(error => consoleLogTime(`${error}`));
