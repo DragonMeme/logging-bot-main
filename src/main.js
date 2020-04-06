@@ -38,21 +38,21 @@ client.on("ready", async () => {
             if(!configJSON.invite) 
                 throw Error("Missing Invite Link! Now it is being generated!");
             else{
-                logTime("    The stored invite link has been found.");
+                logTime("The stored invite link has been found.");
 
                 // Ensure invite link in config.json not tampered with/outdated.
                 await client.generateInvite(0x1000EC56).then(link => {
-                    if(link === configJSON.invite) logTime("    Invite link currently up-to-date!");
+                    if(link === configJSON.invite) logTime("Invite link currently up-to-date!");
                     else{
                         writeFileSync("./data/config.json", JSON.stringify({invite: link}, null, 4));
-                        logTime("    Invite link outdated, replaced with up-to-date link!");
+                        logTime("Invite link outdated, replaced with up-to-date link!");
                     }
                 }).catch(err => logTime(err.message));
             }
         }catch(e){ // Unable to find JSON item.
             await client.generateInvite(0x1000EC56).then(link => {
                 writeFileSync("./data/config.json", JSON.stringify({invite: link}, null, 4));
-                logTime("    Invite link not found, but has been generated and stored!");
+                logTime("Invite link not found, but has been generated and stored!");
             }).catch(err => logTime(err.message));
         }
         initialise(client);
@@ -120,7 +120,7 @@ client.on("message", async (message) => {
 */
 client.on("guildCreate", async (guild) => {
     const guildID = guild.id;
-    logTime(`    Guild ID ${guildID} attempted to add bot to server.`);
+    logTime(`Guild ID ${guildID} attempted to add bot to server.`);
     if(guild.members.filter(member => !member.user.bot).size < 50){
         if(!isGuildOwner(guild, "owner")) return guild.leave(); // Do not add guild to database.
     }
@@ -133,7 +133,7 @@ client.on("guildCreate", async (guild) => {
 */
 client.on("guildDelete", async (guild) => {
     const guildID = guild.id;
-    logTime(`    Left guild (ID: ${guildID})`);
+    logTime(`Left guild (ID: ${guildID})`);
     if(readData(guildID, "G") != null) deleteData([guildID]);
 });
 
@@ -144,13 +144,14 @@ client.on("userUpdate", (oldUser, newUser) => {
                 name: `${prefix}help | @${newUser.username} help` 
             }
         }).then(() => {
-            logTime(`    My username has been changed to ${client.user.username}`);
+            logTime(`My username has been changed to ${client.user.username}`);
         });
     }
 });
 
+client.on("debug", info => logTime(info));
 client.on("disconnect", () => logTime("==> I have disconnected!"));
 client.on("error", error => logTime(error.message));
 client.on("warn", info => logTime(info));
 
-client.login(process.env.BOT_TOKEN).catch(error => logTime(error));
+client.login(process.env.BOT_TOKEN).catch(error => logTime(`${error}`));

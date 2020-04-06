@@ -22,12 +22,12 @@ module.exports = {
                     if(isGuildOwner(guild, "owner")) listGuildID.push(guildID); 
                     else {
                         invalidGuildList.push(guildID);
-                        logTime(`    Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
+                        logTime(`Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
                     }
                 }else listGuildID.push(guildID);
             }
         );
-        logTime("    All guilds that the bot is in has been checked and some may leave servers!");
+        logTime("All guilds that the bot is in has been checked and some may leave servers!");
         
         /*
             Check the database and see whether the entry from listGuildID exists or not.
@@ -37,10 +37,10 @@ module.exports = {
         listGuildID.forEach(guild => {
             if(!guildSettingTable.readData(guild, "G")){
                 guildSettingTable.createData([guild]);
-                logTime(`    ${DefaultSettingValue}: ${guild} was not in database. It is now added!`);
+                logTime(`${DefaultSettingValue}: ${guild} was not in database. It is now added!`);
             }
         });
-        logTime("    New servers successfully added to database.");
+        logTime("New servers successfully added to database.");
 
         /*
             Prune any guild in the database that the the bot is no longer part of.
@@ -51,10 +51,10 @@ module.exports = {
             const guildID = guild[`${DefaultSettingValue}`];
             if(!listGuildID.includes(guildID)) {
                 guildSettingTable.deleteData([guildID]);
-                logTime(`    ${DefaultSettingValue}: ${guildID} is removed from the database.`);
+                logTime(`${DefaultSettingValue}: ${guildID} is removed from the database.`);
             }
         });
-        logTime("    Redundant guild information have been successfully pruned from database!");
+        logTime("Redundant guild information have been successfully pruned from database!");
     },
     invalidGuildList : function(){
         return invalidGuildList.splice(0, invalidGuildList.length);

@@ -11,7 +11,9 @@ module.exports = {
         const date = `${year}/${month}/${day}`;
         const time = `${hour}:${minute}:${second}`;
         const dateTime = `${date} ${time}-${millisecond}`;
-        return console.log(`${dateTime} ${message}`);
+        if(message.startsWith("==> ")) return console.log(`${dateTime} ${message}`);
+        else if(message.startsWith("=>  ")) return console.log(`${dateTime} ${message}`);
+        return console.log(`${dateTime}     ${message}`);
     }
 }
 
