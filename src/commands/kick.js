@@ -20,31 +20,36 @@ module.exports = {
     execute(message, otherArguments){
         switch(otherArguments.length){
             case 0: // No arguments supplied.
-            return message.reply("You have not supplied a member of the guild for me to kick.");
+            if(message.guild.me.hasPermission("KICK_MEMBERS"))
+                return message.reply("You have not supplied a member of the guild for me to kick.");
+            else return message.reply("Sorry I do not have permission `KICK MEMBERS`");
 
             default: // One or more arguments supplied.
-            // Remove "<", "@", "!" and ">" if a mention is used to get the snowflake.
-            const obtainedUserID = /\d+/.exec(otherArguments[0]); 
+            if(message.guild.me.hasPermission("KICK_MEMBERS")){ // Ensure the bot has permission to kick.
+                // Remove "<", "@", "!" and ">" if a mention is used to get the snowflake.
+                const obtainedUserID = /\d+/.exec(otherArguments[0]); 
 
-            const userID = !obtainedUserID ? null : obtainedUserID[0];
-            const memberToKick = message.guild.members.find(member => member.id === userID);
-            if(!memberToKick) return message.reply("Sorry, I am unable to find that member in your guild!");
-            else{
-                if(memberToKick.id === message.client.user.id)
-                    return message.reply("Sorry, I can not kick myself!");
+                const userID = !obtainedUserID ? null : obtainedUserID[0];
+                const memberToKick = message.guild.members.find(member => member.id === userID);
 
-                if(memberToKick.kickable){ // Ensure that the bot can kick the member.
-                    if(isAdministrator(memberToKick)) // Bot will never kick administrators.
-                        return message.reply("Sorry, I do not kick administrators of the server.");
-                    if(isAdministrator(message.member)) // Administrators can kick moderators.
+                if(!memberToKick) return message.reply("Sorry, I am unable to find that member in your guild!");
+                else{
+                    if(memberToKick.id === message.client.user.id)
+                        return message.reply("Sorry, I can not kick myself!");
+
+                    if(memberToKick.kickable){ // Ensure that the bot can kick the member.
+                        if(isAdministrator(memberToKick)) // Bot will never kick administrators.
+                            return message.reply("Sorry, I do not kick administrators of the server.");
+                        if(isAdministrator(message.member)) // Administrators can kick moderators.
+                            return kickMember(message, memberToKick, otherArguments.slice(1).join(" "));
+                        if(isModerator(memberToKick)) // Ensure member does not meet moderator criteria.
+                            return message.reply("Sorry, only administrators can allow me to kick moderators!");
                         return kickMember(message, memberToKick, otherArguments.slice(1).join(" "));
-                    if(isModerator(memberToKick)) // Ensure member does not meet moderator criteria.
-                        return message.reply("Sorry, only administrators can allow me to kick moderators!");
-                    return kickMember(message, memberToKick, otherArguments.slice(1).join(" "));
+                    }
+                    // Other reasons bot can't kick user.
+                    return message.reply("Sorry, I am unable to kick that user!"); 
                 }
-                // Other reasons bot can't kick user.
-                return message.reply("Sorry, I am unable to kick that user!"); 
-            }
+            }else return message.reply("Sorry I do not have permission `KICK MEMBERS`");
         }
     }
 }
