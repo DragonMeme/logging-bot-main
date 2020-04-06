@@ -1,16 +1,16 @@
 const botAuthor = process.env.AUTHOR_ID;
 
 module.exports = {
-    isModerator : function(message){
-        return isModerator(message);
+    isModerator : function(member){ // Needs to be member object.
+        return isModerator(member);
     },
     
-    isAdministrator : function(message){
-        return isAdministrator(message);
+    isAdministrator : function(member){ // Needs to be member object.
+        return isAdministrator(member);
     },
 
-    isBotOwner : function(message){
-        return message.author.id === botAuthor;
+    isBotOwner : function(member){ // Can be member or user.
+        return member.id === botAuthor;
     },
 
     isGuildOwner : function(guild, userID){
@@ -19,8 +19,7 @@ module.exports = {
     }
 }
 
-function isModerator(message){
-    const member = message.guild.members.find(member => member.id === message.author.id);
+function isModerator(member){
     let permissionLevel = 0;
     if(member.hasPermission(0x2)) ++permissionLevel; // Kick Member
     if(member.hasPermission(0x4)) ++permissionLevel; // Ban Member
@@ -29,9 +28,8 @@ function isModerator(message){
     return permissionLevel > 2;
 }
 
-function isAdministrator(message){
-    if(isModerator(message)){
-        const member = message.guild.members.find(member => member.id === message.author.id);
+function isAdministrator(member){
+    if(isModerator(member)){
         let permissionLevel = 0;
         if(member.hasPermission(0x8)) ++permissionLevel; // Administrator (not required)
         if(member.hasPermission(0x10)) ++permissionLevel; // Manage Channels

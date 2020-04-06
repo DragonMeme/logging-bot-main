@@ -7,31 +7,30 @@ module.exports = {
     permissionLevel: 2,
     parameters: {
         category: {
-            requirement: "OPTIONAL",
-            description: `Choose the category of which logging types to show. Possible values include:\n\
-                - \`${Object.keys(SettingTypesIndexes).join("`\n- `")}\`\n\
-                Note that if no argument is supplied, \`all\` is used by default.`
+            requirement: false,
+            description: "Choose the category of which logging types to show. Possible values include:\n" +
+                `- \`${Object.keys(SettingTypesIndexes).join("`\n- `")}\`\n` +
+                "Note that if no argument is supplied, `all` is used by default."
         }
     },
     execute(message, otherArguments){
         if(message.channel.type != "text") return;
         switch(otherArguments.length){
             case 0: // No other arguments needed.
-            message.channel.send(printStatusLog(SettingTypesIndexes.all.max, SettingTypesIndexes.all.min));
-            break;
+            const max = SettingTypesIndexes.all.max;
+            const min = SettingTypesIndexes.all.min;
+            return message.channel.send(printStatusLog(max, min));
 
-            case 1:
+            case 1: // One argument supplied.
             if(Object.keys(SettingTypesIndexes).includes(otherArguments[0])){
                 const max = SettingTypesIndexes[otherArguments[0]].max;
                 const min = SettingTypesIndexes[otherArguments[0]].min;
                 const messageString = printStatusLog(max, min);
-                message.channel.send(messageString);
-            }else message.channel.send(`Invalid logging category \`${otherArguments[0]}\`!`);
-            break;
+                return message.channel.send(messageString);
+            }else return message.channel.send(`Invalid logging category \`${otherArguments[0]}\`!`);
 
             default:
-            message.channel.send("Too many arguments supplied.");
-            break;
+            return message.channel.send("Too many arguments supplied.");
         }
     }
 }

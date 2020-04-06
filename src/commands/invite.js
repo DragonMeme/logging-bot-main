@@ -15,12 +15,10 @@ module.exports = {
             .setColor("#00FFFF")
             .setTitle("Click here to invite me!")
             .setURL(invite);
-            message.channel.send(embed);
-            break;
+            return message.channel.send(embed);
 
             default:
-            message.channel.send("Too many arguments supplied.");
-            break;
+            return message.channel.send("Too many arguments supplied.");
         }
     }
 }

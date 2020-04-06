@@ -76,13 +76,14 @@ client.on("message", async (message) => {
     if(message.author.bot) return undefined;
 
     // Ensure bot would respond either with prefix or with a proper mention.
+    const content = message.content.trim();
     const prefixRegex = new RegExp(`^(${prefix}|<@${client.user.id}> |<@!${client.user.id}> )`);
-    if(!message.content.match(prefixRegex)) return undefined;
+    if(!content.match(prefixRegex)) return undefined;
     if(!["available", "online"].includes(client.user.presence.status)){
         if(!isBotOwner(message)) return undefined;
     }
     const startsWithPrefix = message.content.startsWith(prefix);
-    const listVariables = message.content.toLowerCase().slice(prefix.length).split(" ");
+    const listVariables = content.toLowerCase().slice(prefix.length).split(/\s+/);
     const firstArgument = startsWithPrefix ? listVariables[0] : listVariables[1];
     if(!client.commands.has(firstArgument)) return undefined;
     const command = client.commands.get(firstArgument);
@@ -95,18 +96,18 @@ client.on("message", async (message) => {
         if(message.channel.type == "dm"){
             return message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
         }
-        if(isModerator(message)) return command.execute(message, otherArguments);
+        if(isModerator(message.member)) return command.execute(message, otherArguments);
         else return message.reply("You have insufficient permissions to run this command.");
 
         case 2: // Administrator
         if(message.channel.type == "dm"){
             return message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
         }
-        if(isAdministrator(message)) return command.execute(message, otherArguments);
+        if(isAdministrator(message.member)) return command.execute(message, otherArguments);
         else return message.reply("You have insufficient permissions to run this command.");
 
         case 3: // Bot Author
-        if(isBotOwner(message)) return command.execute(message, otherArguments);
+        if(isBotOwner(message.author)) return command.execute(message, otherArguments);
 
         default:
         return undefined;
