@@ -1,4 +1,3 @@
-const { RichEmbed } = require("discord.js");
 const { readdirSync } = require("fs");
 const { isBotOwner } = require("../common/permissionCheck.js")
 
@@ -10,19 +9,17 @@ module.exports = {
     parameters: {
         command: {
             requirement: false,
-            description: `Supplies you the required information on a specific supported command. \
-            All supported commands can be checked by typing the command \`${process.env.PREFIX}help\`.`
+            description: `Supplies you the required information on a specific supported command. ` +
+            `All supported commands can be checked by typing the command \`${process.env.PREFIX}help\`.`
         }
     },
     execute(message, otherArguments){
         if(!["text", "dm"].includes(message.channel.type)) return;
         switch(otherArguments.length){
             case 0: // No supplied arguments.
-            const embed = new RichEmbed()
-            .setColor("#00FFFF")
-            .setTitle(`${message.client.user.username} Help! (Click here to join the support server)`)
-            .setURL(process.env.MAIN_SERVER_LINK)
-            .setDescription(`Arguments closed with \`[]\` are optional.\nArguments closed with \`<>\` are required.\nDo not add \`[]\` and \`<>\` to your arguments (e.g. \`${process.env.PREFIX}help ping\`).\n`);
+            let helpMessage = `**__${message.client.user.username} Help!__**\n`
+            + `Arguments closed with \`[]\` are optional.\nArguments closed with \`<>\` are required.\n`
+            + `Do not add \`[]\` and \`<>\` to your arguments (e.g. \`${process.env.PREFIX}help ping\`).\n\n`;
             
             readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
                 file => {
@@ -34,67 +31,68 @@ module.exports = {
                             else usageString += ` [${parameter}]`;
                         }
                     )
+                    const commandUsageModule = `\`${usageString}\` - ${description}\n`;
+                    if((helpMessage + commandUsageModule).length > 2000){
+                        message.channel.send(helpMessage);
+                        helpMessage = "";
+                    }
                     if(permissionLevel < 3) // Restrict users from seeing bot owner commands
-                        return embed.addField(name, `Usage: \`${usageString}\`\n${description}`);
+                        return helpMessage += commandUsageModule;
                     if(isBotOwner(message)) // Unless the requester is the bot owner.
-                        return embed.addField(name, `Usage: \`${usageString}\`\n${description}`);
+                        return helpMessage += commandUsageModule;
                 }
             );
-            return message.author.send(embed)
-            .then(() => message.react("🤔"))
-            .catch(() => message.reply("I am unable to send you a direct message!"));
+            return message.channel.send(helpMessage)
+            .then(() => message.react("🤔").catch());
 
             case 1: // Has an argument.
+            const argument = otherArguments[0];
             try{
-                const argument = otherArguments[0];
-                require.resolve(`./${argument}`); 
-                const { description, examples, permissionLevel, parameters } = require(`./${argument}`);
+                require.resolve(`./${argument.toLowerCase()}`); 
+                const { description, examples, name, permissionLevel, parameters } = require(`./${argument.toLowerCase()}`);
 
                 // Ensure that users do not see bot owner commands and treat as non-existent command. Only the bot author may see bot-owner command.
                 if(!isBotOwner(message) && permissionLevel == 3) throw Error("Cannot Find Command!");
                 
-                const embed = new RichEmbed()
-                .setColor("#00FFFF")
-                .setTitle(`COMMAND: ${argument}`)
-                .setDescription(description);
+                let helpMessage = `**__COMMAND: ${name}__**\n${description}\n\n**Permission Level**: `;
 
                 switch(permissionLevel){
                     case 3:
-                    embed.addField("Permission level", "Bot Host");
+                    helpMessage += "Bot Host";
                     break;
 
                     case 2:
-                    embed.addField("Permission level", "Administrator");
+                    helpMessage += "Administrator";
                     break;
 
                     case 1:
-                    embed.addField("Permission level", "Moderator");
+                    helpMessage += "Moderator";
                     break;
 
                     default:
-                    embed.addField("Permission level", "User");
+                    helpMessage += "User";
                     break;
                 }
 
                 // Usage string maker.
-                let usageString = `${process.env.PREFIX}${argument}`
+                let usageString = `${process.env.PREFIX}${name}`
                 Object.keys(parameters).forEach(
                     parameter => {
                         if(parameters[parameter].requirement) usageString += ` <${parameter}>`;
                         else usageString += ` [${parameter}]`;
                     }
                 )
-                embed.addField("Usage", `\`${usageString}\``);
+                helpMessage += `\n**Usage**: \`${usageString}\``;
 
                 // Add explanation of each parameter.
                 Object.keys(parameters).forEach(
                     parameter => {
                         const requirementString = parameters[parameter].requirement ? "REQUIRED" : "OPTIONAL";
                         const descriptionString = parameters[parameter].description;
-                        const argumentDescription = `Requirement: **${requirementString}**\n${descriptionString}`;
-                        embed.addField(`Argument Parameter: ${parameter}`, argumentDescription);
+                        const argumentDescription = `Requirement: *${requirementString}*\n${descriptionString}`;
+                        helpMessage += `\n\n**Argument Parameter**: __${parameter}__\n${argumentDescription}`;
                     }
-                )
+                );
 
                 // Add example of command usage.
                 let exampleString = "";
@@ -102,14 +100,11 @@ module.exports = {
                     example => {
                         exampleString += `\`${process.env.PREFIX}${example}\`\n`;
                     }
-                )
+                );
                 if(exampleString.length > 0) {
-                    embed.addField(examples.length == 1 ? "Example Usage": "Example Usages", exampleString);
+                    helpMessage += `\n\n**${examples.length == 1 ? "Example Usage": "Example Usages"}**\n${exampleString}`;
                 }
-                return message.author.send(embed).then(() => message.react("🤔")).catch(e => {
-                    message.reply("I am unable to send you a direct message!");
-                    console.log(e.message)
-                });
+                return message.channel.send(helpMessage).then(() => message.react("🤔").catch());
                 
             }catch(e){
                 if(e.message.toLowerCase().includes("cannot find")) // Invalid argument case.
