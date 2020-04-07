@@ -21,20 +21,20 @@ module.exports = {
 
 function isModerator(member){
     let permissionLevel = 0;
-    if(member.hasPermission(0x2)) ++permissionLevel; // Kick Member
-    if(member.hasPermission(0x4)) ++permissionLevel; // Ban Member
-    if(member.hasPermission(0x2000)) ++permissionLevel; // Manage Messages
-    if(member.hasPermission(0x8000000)) ++permissionLevel; // Manage Nicknames
+    if(member.hasPermission("KICK_MEMBERS")) ++permissionLevel;
+    if(member.hasPermission("BAN_MEMBERS")) ++permissionLevel;
+    if(member.hasPermission("MANAGE_MESSAGES")) ++permissionLevel;
+    if(member.hasPermission("MANAGE_NICKNAMES")) ++permissionLevel;
     return permissionLevel > 2;
 }
 
 function isAdministrator(member){
     if(isModerator(member)){
         let permissionLevel = 0;
-        if(member.hasPermission(0x8)) ++permissionLevel; // Administrator (not required)
-        if(member.hasPermission(0x10)) ++permissionLevel; // Manage Channels
-        if(member.hasPermission(0x20)) ++permissionLevel; // Manage Guild
-        if(member.hasPermission(0x10000000)) ++permissionLevel; // Manage Roles
+        if(member.hasPermission("ADMINISTRATOR")) ++permissionLevel;
+        if(member.hasPermission("MANAGE_CHANNELS")) ++permissionLevel;
+        if(member.hasPermission("MANAGE_GUILD")) ++permissionLevel;
+        if(member.hasPermission("MANAGE_ROLES")) ++permissionLevel;
         return permissionLevel > 2;
     }else return false;
 }

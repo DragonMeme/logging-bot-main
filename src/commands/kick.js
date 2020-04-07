@@ -1,4 +1,4 @@
-const { isModerator, isAdministrator } = require("../common/permissionCheck.js");
+const { isModerator, isAdministrator } = require("../common/permission_check.js");
 
 module.exports = {
     name: "kick",
@@ -59,5 +59,5 @@ function kickMember(message, member, reason){
         });
     }
     // Other reasons bot can't kick user.
-    return message.reply("Sorry, I am unable to kick that user!"); 
+    return message.reply(`Sorry, I am unable to kick member (Tag: ${member.tag})!`); 
 }
