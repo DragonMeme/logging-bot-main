@@ -87,13 +87,14 @@ function kickMember(message, targetMember, reason){
                 targetMember.kick(reason);
             });
         }else{
-            if(channelFound.permissionsFor(message.guild.me).has("SEND_MESSAGES")){
+            // Ensure the bot can send messages in the logging channel.
+            if(channelFound.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL"])){
                 const msgAuthor = message.member; // Member that requested the kick.
                 const roleUserString = isGuildOwner(message.guild, msgAuthor.id) ? "Guild Owner" :(
                     isAdministrator(msgAuthor) ? "Administrator" : "Moderator"
                 ); // User can not use the kick command so check for user is ignored.
-                const messageString = `**__Kick Command Initiated__**:\n` + 
-                    `**Kicked Member**: (${discordBasicUserDisplay(targetMember)})\n` +
+                const messageString = `👢 **__Kick Command Initiated__** 👢\n` + 
+                    `**Kicked Member** (${discordBasicUserDisplay(targetMember)})\n` +
                     `**Requested by ${roleUserString}** (${discordBasicUserDisplay(msgAuthor)})\n` +
                 (!reason ? `` : `**With reason**:\n\`\`\`\n${reason}\n\`\`\``);
                 return channelFound.send(discordLogTime(messageString)).then(() => {
@@ -102,7 +103,7 @@ function kickMember(message, targetMember, reason){
             }else{
                 updateData(guildIDToCheck, "UK", null);
                 const errorMessage = `Cannot log \`USER_KICKS\` to <#${channelFound.id}> as I do not have` +
-                    "`SEND_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" + 
+                    "`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" + 
                     "Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
                 return message.reply(errorMessage).then(() => {
                     targetMember.kick(reason);

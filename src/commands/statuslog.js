@@ -1,4 +1,5 @@
 const { SettingTypesIndexes, StatusHeaders, SettingValues } = require("../common/guild_setting.json");
+const { readData } = require("../database.js");
 
 module.exports = {
     name: "statuslog",
@@ -15,18 +16,18 @@ module.exports = {
     },
     execute(message, otherArguments){
         if(message.channel.type != "text") return;
+        const guildID = message.guild.id;
         switch(otherArguments.length){
             case 0: // No other arguments needed.
             const max = SettingTypesIndexes.all.max;
             const min = SettingTypesIndexes.all.min;
-            return message.channel.send(printStatusLog(max, min));
+            return message.channel.send(printStatusLog(max, min, guildID));
 
             case 1: // One argument supplied.
             if(Object.keys(SettingTypesIndexes).includes(otherArguments[0])){
                 const max = SettingTypesIndexes[otherArguments[0]].max;
                 const min = SettingTypesIndexes[otherArguments[0]].min;
-                const messageString = printStatusLog(max, min);
-                return message.channel.send(messageString);
+                return message.channel.send(printStatusLog(max, min, guildID));
             }else return message.channel.send(`Invalid logging category \`${otherArguments[0]}\`!`);
 
             default:
@@ -35,14 +36,15 @@ module.exports = {
     }
 }
 
-const printStatusLog = (max, min) => {
+const printStatusLog = (max, min, guildID) => {
+    const shortcutListSettingValues = Object.keys(SettingValues);
     let messageString = "Current channels for logging of specific activity:";
     for(let i = min; i < max; i++){
         if(Object.keys(StatusHeaders).includes(String(i))) 
             messageString += `\n__**${StatusHeaders[String(i)]}:**__\n`;
         const currentValue = Object.values(SettingValues)[i];
-        const result = null; // TODO: Get data from database.
-        messageString += `${currentValue}: ${result == null ? "Not Set!" : `<#${result}>`}\n`;
+        const result = readData(guildID, shortcutListSettingValues[i]); // TODO: Get data from database.
+        messageString += `${currentValue}: ${!result ? "Not Set!" : `<#${result}>`}\n`;
     }
     return messageString;
 }
