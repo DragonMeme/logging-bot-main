@@ -30,20 +30,17 @@ module.exports = {
                             if(parameters[parameter].requirement) usageString += ` <${parameter}>`;
                             else usageString += ` [${parameter}]`;
                         }
-                    )
+                    );
                     const commandUsageModule = `\`${usageString}\` - ${description}\n`;
                     if((helpMessage + commandUsageModule).length > 2000){
                         message.channel.send(helpMessage);
                         helpMessage = "";
                     }
-                    if(permissionLevel < 3) // Restrict users from seeing bot owner commands
-                        return helpMessage += commandUsageModule;
-                    if(isBotOwner(message)) // Unless the requester is the bot owner.
+                    if(permissionLevel < 3 || isBotOwner(message)) // Restrict users from seeing bot owner commands
                         return helpMessage += commandUsageModule;
                 }
             );
-            return message.channel.send(helpMessage)
-            .then(() => message.react("🤔").catch());
+            return message.channel.send(helpMessage).then(() => message.react("🤔").catch());
 
             case 1: // Has an argument.
             const argument = otherArguments[0];
@@ -96,14 +93,11 @@ module.exports = {
 
                 // Add example of command usage.
                 let exampleString = "";
-                examples.forEach(
-                    example => {
-                        exampleString += `\`${process.env.PREFIX}${example}\`\n`;
-                    }
-                );
-                if(exampleString.length > 0) {
+                examples.forEach(example => exampleString += `\`${process.env.PREFIX}${example}\`\n`);
+
+                if(exampleString.length > 0) 
                     helpMessage += `\n\n**${examples.length == 1 ? "Example Usage": "Example Usages"}**\n${exampleString}`;
-                }
+
                 return message.channel.send(helpMessage).then(() => message.react("🤔").catch());
                 
             }catch(e){
