@@ -8,14 +8,16 @@ module.exports = {
         if(!["text", "dm"].includes(message.channel.type)) return;
         switch(otherArguments.length){
             case 0:
-            return message.channel.send("Shutting down!").then(
+            message.channel.send("Shutting down!").then(
                 sentMessage => {
                     sentMessage.client.destroy();
                 }
             );
+            break;
 
             default:
-            return message.channel.send("Too many arguments supplied.");
+            message.channel.send("Too many arguments supplied.");
+            break;
         }
     }
 }
