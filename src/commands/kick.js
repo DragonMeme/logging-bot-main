@@ -41,23 +41,23 @@ module.exports = {
     }
 }
 
-function kickMember(message, member, reason){
-    if(member.id === message.client.user.id)
+function kickMember(message, targetMember, reason){
+    if(targetMember.id === message.client.user.id)
         return message.reply("Sorry, I can not kick myself!");
 
-    if(member.kickable){ // Ensure that the bot can kick the member.
-        if(isAdministrator(member)) // Bot will never kick administrators.
+    if(targetMember.kickable){ // Ensure that the bot can kick the member.
+        if(isAdministrator(targetMember)) // Bot will never kick administrators.
             return message.reply("Sorry, I do not kick administrators of the server.");
-        if(isAdministrator(message.member)) // Administrators can kick moderators.
-            return message.channel.send(`<@${member.id}> has been kicked!`).then(() => {
-                member.kick(reason); // Will add later for logging.
+        if(isAdministrator(message.member)) // Administrators can kick moderators and lower.
+            return message.channel.send(`<@${targetMember.id}> has been kicked!`).then(() => {
+                targetMember.kick(reason); // Will add more later for logging.
             });
-        if(isModerator(member)) // Ensure member does not meet moderator criteria.
+        if(isModerator(targetMember)) // Ensure member does not meet moderator criteria.
             return message.reply("Sorry, only administrators can allow me to kick moderators!");
-        return message.channel.send(`<@${member.id}> has been kicked!`).then(() => {
-            member.kick(reason); // Will add later for logging.
+        return message.channel.send(`<@${targetMember.id}> has been kicked!`).then(() => {
+            targetMember.kick(reason); // Will add more later for logging.
         });
     }
     // Other reasons bot can't kick user.
-    return message.reply(`Sorry, I am unable to kick member (Tag: ${member.tag})!`); 
+    return message.reply(`Sorry, I am unable to kick member (Tag: ${targetMember.user.tag}, ID: ${targetMember.id})!`); 
 }
