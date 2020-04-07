@@ -1,8 +1,7 @@
-const Assert = require("assert");
+const { equal } = require("assert");
 
 describe("No tests made", function(){
-    it("Should work!", () => {
-        Assert.equal(true, true, "Not Working!");
-    })
-
+	it("Should work!", () => {
+		equal(true, true, "Not Working!");
+	});
 });
