@@ -36,7 +36,7 @@ module.exports = {
                         message.channel.send(helpMessage);
                         helpMessage = "";
                     }
-                    if(permissionLevel < 3 || isBotOwner(message)) // Restrict users from seeing bot owner commands
+                    if(permissionLevel < 3 || isBotOwner(message.author)) // Restrict users from seeing bot owner commands
                         return helpMessage += commandUsageModule;
                 }
             );
@@ -49,7 +49,7 @@ module.exports = {
                 const { description, examples, name, permissionLevel, parameters } = require(`./${argument.toLowerCase()}`);
 
                 // Ensure that users do not see bot owner commands and treat as non-existent command. Only the bot author may see bot-owner command.
-                if(!isBotOwner(message) && permissionLevel == 3) throw Error("Cannot Find Command!");
+                if(!isBotOwner(message.author) && permissionLevel == 3) throw Error("Cannot Find Command!");
                 
                 let helpMessage = `**__COMMAND: ${name}__**\n${description}\n\n**Permission Level**: `;
 
