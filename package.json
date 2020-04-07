@@ -4,8 +4,8 @@
   "description": "A logging discord bot.",
   "main": "src/main.js",
   "dependencies": {
-    "better-sqlite3": "^5.4.3",
-    "discord.js": "^11.6.3",
+    "better-sqlite3": "^6.0.1",
+    "discord.js": "^11.6.4",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
@@ -13,7 +13,7 @@
     "chai": "^4.2.0"
   },
   "scripts": {
-    "test": "mocha src/main.test.js --exit --timeout 10000",
+    "test": "mocha test/main.test.js --exit --timeout 10000",
     "start": "node -r dotenv/config src/main.js"
   },
   "repository": {
@@ -26,7 +26,7 @@
     "Bot"
   ],
   "author": "DragonMeme",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/DragonMeme/logging-bot-main/issues"
   },
