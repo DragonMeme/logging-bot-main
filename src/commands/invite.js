@@ -15,12 +15,16 @@ module.exports = {
             .setColor("#00FFFF")
             .setTitle("Click here to invite me!")
             .setURL(invite);
-            message.channel.send(embed);
-            break;
+            return message.channel.send(embed).catch(
+                e1 => {
+                    if(e1.message.includes("Missing Permissions")) {
+                        message.channel.send("Missing permission `EMBED_LINKS`. Send me the command in a direct message!");
+                    }
+                }
+            );
 
             default:
-            message.channel.send("Too many arguments supplied.");
-            break;
+            return message.channel.send("Too many arguments supplied.");
         }
     }
 }
