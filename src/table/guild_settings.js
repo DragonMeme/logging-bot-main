@@ -15,11 +15,11 @@ module.exports = class Guild_Setting{
     }
 
     // POST: Creates a row entry instantiated with Guild ID.
-    createData(listGuild){
+    createData(listGuildID){
         const sql = `INSERT INTO "${this.tableName}"("${DefaultSettingValue}") VALUES(?)`;
         const db = new sqlite3("data/server.db", {"verbose": null });
         const statement = db.prepare(sql);
-        listGuild.forEach(guild => statement.run(guild));
+        listGuildID.forEach(guildID => statement.run(guildID));
         db.close();
     }
 
@@ -33,11 +33,11 @@ module.exports = class Guild_Setting{
     }
 
     // DELETE: Deletes a row entry.
-    deleteData(listGuild){
+    deleteData(listGuildID){
         const sql = `DELETE FROM "${this.tableName}" WHERE "${DefaultSettingValue}" = ?`;
         const db = new sqlite3("data/server.db", {"verbose": null });
         const statement = db.prepare(sql);
-        listGuild.forEach(guild => statement.run(guild));
+        listGuildID.forEach(guildID => statement.run(guildID));
         db.close();
     }
 

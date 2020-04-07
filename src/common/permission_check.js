@@ -13,7 +13,7 @@ module.exports = {
         return member.id === botAuthor;
     },
 
-    isGuildOwner : function(guild, userID){
+    isGuildOwner : function(guild, userID){ // Ensure to put ID of user and guild object to compare with.
         if(userID === "owner") return guild.ownerID === botAuthor;
         else return guild.ownerID === userID;
     }

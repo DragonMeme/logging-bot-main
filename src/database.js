@@ -63,17 +63,17 @@ module.exports = {
     /*
         CRUD Commands.
     */
-    createData : function(listGuild){
-        guildSettingTable.createData(listGuild);
+    createData : function(listGuildID){
+        guildSettingTable.createData(listGuildID);
     },
-    readData : function(guild, setting){
-        return guildSettingTable.readData(guild, setting);
+    readData : function(guildID, setting){
+        return guildSettingTable.readData(guildID, setting);
     },
-    updateData : function(guild, setting, data){
-        guildSettingTable.updateData(guild, setting, data);
+    updateData : function(guildID, setting, data){
+        guildSettingTable.updateData(guildID, setting, data);
     },
-    deleteData : function(listGuild){
-        guildSettingTable.deleteData(listGuild);
+    deleteData : function(listGuildID){
+        guildSettingTable.deleteData(listGuildID);
     }
 }
 

@@ -1,4 +1,6 @@
-const { isModerator, isAdministrator } = require("../common/permission_check.js");
+const { isModerator, isAdministrator, isGuildOwner } = require("../common/permission_check.js");
+const { readData, updateData } = require("../database.js");
+const { discordLogTime, discordBasicUserDisplay } = require("../common/logger.js")
 
 module.exports = {
     name: "kick",
@@ -29,35 +31,83 @@ module.exports = {
                 return message.reply("You have not supplied a member of the guild for me to kick.");
 
                 case 1: // Only the user is supplied.
-                if(!memberToKick) return message.reply("Sorry, I am unable to find that member in your guild!");
-                else return kickMember(message, memberToKick, null);
+                return attemptKickMember(message, memberToKick, null);
 
                 default: // A reason is supplied as well as the user.
                 const reason = otherArguments.slice(1).join(" ");
-                if(!memberToKick) return message.reply("Sorry, I am unable to find that member in your guild!");
-                else return kickMember(message, memberToKick, reason);
+                return attemptKickMember(message, memberToKick, reason);
             }
         }else return message.reply("Missing permission `KICK MEMBERS`");
     }
 }
 
-function kickMember(message, targetMember, reason){
-    if(targetMember.id === message.client.user.id)
-        return message.reply("Sorry, I can not kick myself!");
+function attemptKickMember(message, targetMember, reason){
+    if(!targetMember) return message.reply("Sorry, I am unable to find that member in your guild!");
+    else {
+        if(targetMember.id === message.client.user.id)
+            return message.reply("Sorry, I can not kick myself!");
 
-    if(targetMember.kickable){ // Ensure that the bot can kick the member.
-        if(isAdministrator(targetMember)) // Bot will never kick administrators.
-            return message.reply("Sorry, I do not kick administrators of the server.");
-        if(isAdministrator(message.member)) // Administrators can kick moderators and lower.
+        if(targetMember.kickable){ // Ensure that the bot can kick the member.
+            if(isAdministrator(targetMember)) // Bot will never kick administrators.
+                return message.reply("Sorry, I do not kick administrators of the server.");
+            if(isAdministrator(message.member)) // Administrators can kick moderators and lower.
+                return message.channel.send(`<@${targetMember.id}> has been kicked!`).then(() => {
+                    kickMember(message, targetMember, reason)
+                });
+            if(isModerator(targetMember)) // Ensure member does not meet moderator criteria.
+                return message.reply("Sorry, only administrators can allow me to kick moderators!");
             return message.channel.send(`<@${targetMember.id}> has been kicked!`).then(() => {
-                targetMember.kick(reason); // Will add more later for logging.
+                kickMember(message, targetMember, reason)
             });
-        if(isModerator(targetMember)) // Ensure member does not meet moderator criteria.
-            return message.reply("Sorry, only administrators can allow me to kick moderators!");
-        return message.channel.send(`<@${targetMember.id}> has been kicked!`).then(() => {
-            targetMember.kick(reason); // Will add more later for logging.
-        });
+        }
+        // Other reasons bot can't kick user.
+        return message.reply(`Sorry, I am unable to kick member (${discordBasicUserDisplay(targetMember)})!`); 
     }
-    // Other reasons bot can't kick user.
-    return message.reply(`Sorry, I am unable to kick member (Tag: ${targetMember.user.tag}, ID: ${targetMember.id})!`); 
+}
+
+function kickMember(message, targetMember, reason){
+    const guildIDToCheck = message.guild.id;
+    const logsForUserKickedChannelID = readData(guildIDToCheck, "UK");
+    if(!logsForUserKickedChannelID) // Logging for User Kicks not set.
+        return targetMember.kick(reason);
+    else{
+        const channelFound = message.guild.channels.find(channel => channel.id === logsForUserKickedChannelID);
+        /*
+            These checks may not be needed as most can be handled by setlog/quicksetlog commands, 
+            channelUpdate and channelDelete events.
+            However these check are most useful in the event the bot is shut down and restarted
+            and the requirements are not fetched by then.
+        */
+        if(!channelFound){ // Channel is deleted/missing.
+            updateData(guildIDToCheck, "UK", null);
+            const errorMessage = "The logging channel for `USER_KICKS` was not found.\n" +
+                "The setting will be reset to none being set.\n" + 
+                "Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
+            return message.reply(errorMessage).then(() => {
+                targetMember.kick(reason);
+            });
+        }else{
+            if(channelFound.permissionsFor(message.guild.me).has("SEND_MESSAGES")){
+                const msgAuthor = message.member; // Member that requested the kick.
+                const roleUserString = isGuildOwner(message.guild, msgAuthor.id) ? "Guild Owner" :(
+                    isAdministrator(msgAuthor) ? "Administrator" : "Moderator"
+                ); // User can not use the kick command so check for user is ignored.
+                const messageString = `**__Kick Command Initiated__**:\n` + 
+                    `**Kicked Member**: (${discordBasicUserDisplay(targetMember)})\n` +
+                    `**Requested by ${roleUserString}** (${discordBasicUserDisplay(msgAuthor)})\n` +
+                (!reason ? `` : `**With reason**:\n\`\`\`\n${reason}\n\`\`\``);
+                return channelFound.send(discordLogTime(messageString)).then(() => {
+                    targetMember.kick(reason);
+                })
+            }else{
+                updateData(guildIDToCheck, "UK", null);
+                const errorMessage = `Cannot log \`USER_KICKS\` to <#${channelFound.id}> as I do not have` +
+                    "`SEND_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" + 
+                    "Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
+                return message.reply(errorMessage).then(() => {
+                    targetMember.kick(reason);
+                });
+            }
+        }
+    }
 }
