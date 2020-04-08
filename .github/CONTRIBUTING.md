@@ -4,74 +4,60 @@
 ## Coding Practice
 In order to contribute to this project, you must follow a set of rules in the format of coding in which a few are listed below:
 
-1.) No using of AND statements (`&&` and/or `&`), use nested if statements instead.
+1.) When coding it is important to use ESLint.
+This is available in IDEs such as Visual Studio Code. The linter will help you with the coding practice you must follow (not all) yet but worthy of mentioning them here as they may not be detected by the linter.
+Check out the `.eslintrc` file to check for more information about the rules of coding practice.
 
-Example:
+2.) If you want to declare variables in a `case statement`, you have to perform an allman notation of adding curly brackets.
 ```js
-// Not wanted
-if(a && b){
-  func1();
-}else{
-  func2();
-}
-
-// Wanted
-if(a){
-  if(b){
-    func1();
-  }else{
-    func2();
+switch(argument[0]){
+  case 0: // Wanted
+  { 
+    const helpMessage = "You did not supply any arguments.";
+    channel.send(helpMessage);
+    break;
   }
-}else{
-  func2();
+
+  case 1:{ // Not wanted
+    const helpMessage = `${help.name} - ${help.description}`;
+    channel.send(helpMessage);
+    break;
+  }
+
+  default: // A default case is always required.
 }
 ```
-Reason: Putting multiple conditions in an if statement makes the overall condition harder for user to analyse. By using nested if statements, the condition flow makes the overall required condition easier to follow.
 
-
-2.) Any string that does not have a template literal (`${value}`) has to be closed with double quotation marks.
+3.) Adding strings is not necessary unless they are too long.
 ```js
-func1(){
-  // Wanted (Double quotations)
-  const missing = "fox";
+// Not wanted, this can be replicated in template literals like in string2.
+const string1 = "Hello this is " + name + ".";
 
-  // Wanted (Strings with template literals to be closed with backticks)
-  const fullText = `This is a ${missing}.`;
-}
+// Wanted if adding a variable to change the string as needed.
+const string2 = `Hello this is ${name}.`;
 
-func2(){
-  // Not Wanted 
-  const missing = 'fox';
-  
-  // Not Wanted
-  const fullText = "This is a " + missing + ".";
-}
-
+// This is okay as the string was too long.
+const string3 = `This sentence "The big brown fox jumps over the lazy ${animal}." `
+    + "Actually contains all the 26 characters of the English alphabet!";
 ```
-Reason: Strings closed with backticks has a nice feature that allows putting a variable in the string. Double quotation marks makes reading a static string easier to differentiate between strings that use backticks as compared to using single quotation marks.
 
-3.) Only code that has the required intended functionality completed may be pushed in to the intended repository.
-
-Users may only push working code to a non-default branch. Changes of code to the master branch should only happen when the requested branch has the optimized and working code and ready to be merged in to master.
-
-4.) Variable Naming convention.
-
-Anywhere in the code, variables must have their names without an underscore.
+4.) Conditional statements that are very long, the body of the statement can be added in the next line. If possible attempt to seperate the conditional statement.
 ```js
-/*
-  Supposedly read() function reads the database.
-  We want to assign the resultant to a variable.
-*/
+// Wanted: Short if statement so can be in one line.
+if(animal === "dog") animal.bark();
 
-// Wanted (replace space with a starting capital letter of the 2nd word and so forth)
-readDatabase = read(input);
+// Curly brackets not needed unless there is 2 or more lines of code.
+if(animal === "dog") {animal.bark()}
 
-// Acceptable (known shortcuts can be in all capitals)
-readDB = read(input);
+// Good way to handle a long conditional if statement.
+if(message.guild.cache.get(guildID).channels.cache.get(channelID).type === "text")
+    console.log("This is indeed a text channel.");
 
-// Not Wanted (has underscore)
-read_Database = read(input);
-
-// Not Wanted (reduces readability)
-readdatabase = read(input);
+// Another good way to handle the if statement. This allows more debugging.
+const targetGuild = message.guild.cache.get(guildID);
+if(targetGuild){
+  if(targetGuild.channels.cache.get(channelID)) 
+    console.log("This is indeed a text channel.");
+  else console.log("The guild exists but the channel does not!");
+}else console.log("Guild does not exist");
 ```
