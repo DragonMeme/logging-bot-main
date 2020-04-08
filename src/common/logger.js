@@ -15,6 +15,7 @@ module.exports = {
 		else if(message.startsWith("=>  ")) return console.log(`${dateTime} ${message}`);
 		return console.log(`${dateTime}     ${message}`);
 	},
+
 	discordLogTime: function(message){
 		const dateObject = new Date(Date.now());
 		const year = dateObject.getUTCFullYear();
@@ -29,6 +30,7 @@ module.exports = {
 		const dateTime = `UTC ${date} ${time}-${millisecond}`;
 		return `\`${dateTime}\` ${message}`;
 	},
+
 	discordBasicUserDisplay: function(member){
 		return `**Tag**: \`${member.user.tag}\` **ID**: \`${member.id}\``;
 	}

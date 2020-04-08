@@ -18,7 +18,8 @@ module.exports = {
 		if(message.channel.type !== "text") return;
 		const guildID = message.guild.id;
 		switch(otherArguments.length){
-			case 0:{// No other arguments needed.
+			case 0: // No other arguments needed.
+			{
 				const max = SettingTypesIndexes.all.max;
 				const min = SettingTypesIndexes.all.min;
 				message.channel.send(printStatusLog(max, min, guildID));

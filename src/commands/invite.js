@@ -10,21 +10,22 @@ module.exports = {
 		const { invite } = require("../../data/config.json");
 		if(!["text", "dm"].includes(message.channel.type)) return;
 		switch(otherArguments.length){
-			case 0:{ // No other arguments needed.
+			case 0: // No other arguments needed.
+			{
 				const embed = new RichEmbed()
 					.setColor("#00FFFF")
 					.setTitle("Click here to invite me!")
 					.setURL(invite);
 				message.channel.send(embed).catch(
 					e1 => {
-						if(e1.message.includes("Missing Permissions")){ 
+						if(e1.message.includes("Missing Permissions")){
 							message.channel.send("Missing permission `EMBED_LINKS`. Send me the command in a direct message!");
 						}
 					}
 				);
 				break;
 			}
-            
+
 			default:
 				message.channel.send("Too many arguments supplied.");
 		}

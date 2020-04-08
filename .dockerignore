@@ -10,6 +10,7 @@ lerna-debug.log*
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
+test/
 data/
 pids
 *.pid
@@ -51,8 +52,8 @@ typings/
 # Optional npm cache directory
 .npm
 
-# Optional eslint cache
-.eslintcache
+# All eslint related file settings.
+.eslint*
 
 # Microbundle cache
 .rpt2_cache/
@@ -68,6 +69,10 @@ typings/
 
 # Yarn Integrity file
 .yarn-integrity
+
+# dotenv environment variables file
+*.env
+*.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -104,10 +109,8 @@ dist
 .git*/
 .gitignore
 **/*.md
-LICENSE
+!README*.md
 
-# Linter configuration files
-.eslint*
-
-# Package Lock JSON File
-package-lock.json
+# NPM related storage files not needed.
+package-lock*
+.npmrc

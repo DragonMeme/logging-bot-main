@@ -10,19 +10,19 @@ module.exports = {
 	parameters: {
 		member: {
 			requirement: true,
-			description: "The member to kick out of the server given the member is in the guild. " + 
+			description: "The member to kick out of the server given the member is in the guild. " +
             "This argument must be the ID of the user or a user mention."
 		},
 		reason: {
 			requirement: false,
-			description: "The reason for the kick. The reason is not required to be put in double " + 
+			description: "The reason for the kick. The reason is not required to be put in double " +
             "quotation marks and can have more than 1 word."
 		}
 	},
 	execute(message, otherArguments){
 		if(message.guild.me.hasPermission("KICK_MEMBERS")){ // Ensure the bot has permission to kick.
 			// Remove "<", "@", "!" and ">" if a mention is used to get the snowflake.
-			const obtainedUserID = /\d+/.exec(otherArguments[0]); 
+			const obtainedUserID = /\d+/.exec(otherArguments[0]);
 
 			// Obtain member to kick.
 			const memberToKick = message.guild.members.find(member => member.id === obtainedUserID[0]);
@@ -62,8 +62,7 @@ function attemptKickMember(message, targetMember, reason){
 		});
 	}
 	// Other reasons bot can't kick user.
-	return message.reply(`Sorry, I am unable to kick member (${discordBasicUserDisplay(targetMember)})!`); 
-	
+	return message.reply(`Sorry, I am unable to kick member (${discordBasicUserDisplay(targetMember)})!`);
 }
 
 function kickMember(message, targetMember, reason){
@@ -74,7 +73,7 @@ function kickMember(message, targetMember, reason){
 	}
 	const channelFound = message.guild.channels.find(channel => channel.id === logsForUserKickedChannelID);
 	/*
-            These checks may not be needed as most can be handled by setlog/quicksetlog commands, 
+            These checks may not be needed as most can be handled by setlog/quicksetlog commands,
             channelUpdate and channelDelete events.
             However these check are most useful in the event the bot is shut down and restarted
             and the requirements are not fetched by then.
@@ -82,7 +81,7 @@ function kickMember(message, targetMember, reason){
 	if(!channelFound){ // Channel is deleted/missing.
 		updateData(guildIDToCheck, "UK", null);
 		const errorMessage = "The logging channel for `USER_KICKS` was not found.\n" +
-                "The setting will be reset to none being set.\n" + 
+                "The setting will be reset to none being set.\n" +
                 "Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
 		return message.reply(errorMessage).then(() => {
 			targetMember.kick(reason);
@@ -92,8 +91,8 @@ function kickMember(message, targetMember, reason){
 	if(channelFound.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL"])){
 		const msgAuthor = message.member; // Member that requested the kick.
 		const roleUserString = isGuildOwner(message.guild, msgAuthor.id) ? "Guild Owner" :
-			isAdministrator(msgAuthor) ? "Administrator" : "Moderator"; 
-		const messageString = "👢 **__Kick Command Initiated__** 👢\n" + 
+			isAdministrator(msgAuthor) ? "Administrator" : "Moderator";
+		const messageString = "👢 **__Kick Command Initiated__** 👢\n" +
 			`**Kicked Member** (${discordBasicUserDisplay(targetMember)})\n` +
 			`**Requested by ${roleUserString}** (${discordBasicUserDisplay(msgAuthor)})\n` +
 			(!reason ? "" : `**With reason**:\n\`\`\`\n${reason}\n\`\`\``);
@@ -103,11 +102,9 @@ function kickMember(message, targetMember, reason){
 	}
 	updateData(guildIDToCheck, "UK", null);
 	const errorMessage = `Cannot log \`USER_KICKS\` to <#${channelFound.id}> as I do not have` +
-		"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" + 
+		"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" +
 		"Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
 	return message.reply(errorMessage).then(() => {
 		targetMember.kick(reason);
 	});
-		
-	
 }

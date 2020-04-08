@@ -19,7 +19,7 @@ module.exports = {
 			guild => {
 				const guildID = guild.id;
 				if(guild.members.filter(member => !member.user.bot).size < 50){
-					if(isGuildOwner(guild, "owner")) listGuildID.push(guildID); 
+					if(isGuildOwner(guild, "owner")) listGuildID.push(guildID);
 					else {
 						invalidGuildList.push(guildID);
 						consoleLogTime(`Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
@@ -28,7 +28,7 @@ module.exports = {
 			}
 		);
 		consoleLogTime("All guilds that the bot is in has been checked and some may leave servers!");
-        
+
 		/*
             Check the database and see whether the entry from listGuildID exists or not.
             Add missing GuildID to database if needed.
@@ -56,27 +56,25 @@ module.exports = {
 		});
 		consoleLogTime("Redundant guild information have been successfully pruned from database!");
 	},
+
 	invalidGuildList : function(){
 		return invalidGuildList.splice(0, invalidGuildList.length);
 	},
 
-	/*
-        CRUD Commands.
-    */
+	// CRUD Commands.
 	createData : function(listGuildID){
 		guildSettingTable.createData(listGuildID);
 	},
+
 	readData : function(guildID, setting){
 		return guildSettingTable.readData(guildID, setting);
 	},
+
 	updateData : function(guildID, setting, data){
 		guildSettingTable.updateData(guildID, setting, data);
 	},
+
 	deleteData : function(listGuildID){
 		guildSettingTable.deleteData(listGuildID);
 	}
 };
-
-
-
-

@@ -4,7 +4,7 @@ module.exports = {
 	isModerator : function(member){ // Needs to be member object.
 		return isModerator(member);
 	},
-    
+
 	isAdministrator : function(member){ // Needs to be member object.
 		return isAdministrator(member);
 	},
