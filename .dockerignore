@@ -10,6 +10,7 @@ lerna-debug.log*
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
+test/
 data/
 pids
 *.pid
@@ -51,8 +52,8 @@ typings/
 # Optional npm cache directory
 .npm
 
-# Optional eslint cache
-.eslintcache
+# All eslint related file settings.
+.eslint*
 
 # Microbundle cache
 .rpt2_cache/
@@ -108,15 +109,8 @@ dist
 .git*/
 .gitignore
 **/*.md
-
-# Exclude any README files as this contains potentially important information.
 !README*.md
 
-# Linter related files
-.eslint*
-
-# Package Lock JSON File
-package-lock.json
-
-# Testing files
-test/
+# NPM related storage files not needed.
+package-lock*
+.npmrc
