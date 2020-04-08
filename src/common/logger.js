@@ -36,6 +36,6 @@ module.exports = {
 
 function numberString(length, number){
 	let result = "";
-	for(let i = length - 1; i >= 0; i--) result += Math.floor(((number / Math.pow(10, i)) % 10)).toFixed(0);
+	for(let i = length - 1; i >= 0; i--) result += Math.floor(number / Math.pow(10, i) % 10).toFixed(0);
 	return result;
 }

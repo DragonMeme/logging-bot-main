@@ -15,10 +15,10 @@ module.exports = {
 		}
 	},
 	execute(message, otherArguments){
-		if(message.channel.type != "text") return;
+		if(message.channel.type !== "text") return;
 		const guildID = message.guild.id;
 		switch(otherArguments.length){
-			case 0: {// No other arguments needed.
+			case 0:{// No other arguments needed.
 				const max = SettingTypesIndexes.all.max;
 				const min = SettingTypesIndexes.all.min;
 				message.channel.send(printStatusLog(max, min, guildID));
@@ -43,8 +43,7 @@ const printStatusLog = (max, min, guildID) => {
 	const shortcutListSettingValues = Object.keys(SettingValues);
 	let messageString = "Current channels for logging of specific activity:";
 	for(let i = min; i < max; i++){
-		if(Object.keys(StatusHeaders).includes(String(i))) 
-			messageString += `\n__**${StatusHeaders[String(i)]}:**__\n`;
+		if(Object.keys(StatusHeaders).includes(String(i))) messageString += `\n__**${StatusHeaders[String(i)]}:**__\n`;
 		const currentValue = Object.values(SettingValues)[i];
 		const result = readData(guildID, shortcutListSettingValues[i]); // TODO: Get data from database.
 		messageString += `${currentValue}: ${!result ? "Not Set!" : `<#${result}>`}\n`;

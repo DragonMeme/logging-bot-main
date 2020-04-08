@@ -16,7 +16,7 @@ module.exports = {
 	execute(message, otherArguments){
 		if(!["text", "dm"].includes(message.channel.type)) return;
 		switch(otherArguments.length){
-			case 0: {// No supplied arguments.
+			case 0:{ // No supplied arguments.
 				let helpMessage = `**__${message.client.user.username} Help!__**\n`
                 + "Arguments closed with `[]` are optional.\nArguments closed with `<>` are required.\n"
                 + `Do not add \`[]\` and \`<>\` to your arguments (e.g. \`${process.env.PREFIX}help ping\`).\n\n`;
@@ -36,8 +36,9 @@ module.exports = {
 							message.channel.send(helpMessage);
 							helpMessage = "";
 						}
-						if(permissionLevel < 3 || isBotOwner(message.author)) // Restrict users from seeing bot owner commands
+						if(permissionLevel < 3 || isBotOwner(message.author)){ // Restrict users from seeing bot owner commands
 							helpMessage += commandUsageModule;
+						}
 						return helpMessage;
 					}
 				);
@@ -45,14 +46,14 @@ module.exports = {
 				break;
 			}
             
-			case 1: {// Has an argument.
+			case 1:{ // Has an argument.
 				const argument = otherArguments[0];
 				try{
 					require.resolve(`./${argument.toLowerCase()}`); 
 					const { description, examples, name, permissionLevel, parameters } = require(`./${argument.toLowerCase()}`);
 
 					// Ensure that users do not see bot owner commands and treat as non-existent command. Only the bot author may see bot-owner command.
-					if(!isBotOwner(message.author) && permissionLevel == 3) throw Error("Cannot Find Command!");
+					if(!isBotOwner(message.author) && permissionLevel === 3) throw Error("Cannot Find Command!");
                 
 					let helpMessage = `**__COMMAND: ${name}__**\n${description}\n\n**Permission Level**: `;
 
@@ -98,14 +99,15 @@ module.exports = {
 					let exampleString = "";
 					examples.forEach(example => exampleString += `\`${process.env.PREFIX}${example}\`\n`);
 
-					if(exampleString.length > 0) 
-						helpMessage += `\n\n**${examples.length == 1 ? "Example Usage": "Example Usages"}**\n${exampleString}`;
-
+					if(exampleString.length > 0){
+						helpMessage += `\n\n**${examples.length === 1 ? "Example Usage": "Example Usages"}**\n${exampleString}`;
+					}
 					message.channel.send(helpMessage).then(() => message.react("🤔").catch());
                 
 				}catch(e){
-					if(e.message.toLowerCase().includes("cannot find")) // Invalid argument case.
+					if(e.message.toLowerCase().includes("cannot find")){ // Invalid argument case.
 						message.channel.send(`Sorry, I do not support command \`${argument}\``);
+					}
 				}
 				break;
 			}

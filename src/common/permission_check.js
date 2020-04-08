@@ -15,7 +15,7 @@ module.exports = {
 
 	isGuildOwner : function(guild, userID){ // Ensure to put ID of user and guild object to compare with.
 		if(userID === "owner") return guild.ownerID === botAuthor;
-		else return guild.ownerID === userID;
+		return guild.ownerID === userID;
 	}
 };
 
@@ -36,5 +36,6 @@ function isAdministrator(member){
 		if(member.hasPermission("MANAGE_GUILD")) ++permissionLevel;
 		if(member.hasPermission("MANAGE_ROLES")) ++permissionLevel;
 		return permissionLevel > 2;
-	}else return false;
+	}
+	return false;
 }

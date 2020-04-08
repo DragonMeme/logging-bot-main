@@ -18,13 +18,13 @@ module.exports = {
 		client.guilds.forEach(
 			guild => {
 				const guildID = guild.id;
-				if(guild.members.filter(member => !member.user.bot).size < 50)
+				if(guild.members.filter(member => !member.user.bot).size < 50){
 					if(isGuildOwner(guild, "owner")) listGuildID.push(guildID); 
 					else {
 						invalidGuildList.push(guildID);
 						consoleLogTime(`Guild ID "${guildID}" does not meet the pre-requisite so not added.`);
 					}
-				else listGuildID.push(guildID);
+				}else listGuildID.push(guildID);
 			}
 		);
 		consoleLogTime("All guilds that the bot is in has been checked and some may leave servers!");
@@ -49,7 +49,7 @@ module.exports = {
 		consoleLogTime("=>  Removing any server information that the bot is currently not in from database.");
 		guildSettingTable.readDataBase().forEach(guild => {
 			const guildID = guild[`${DefaultSettingValue}`];
-			if(!listGuildID.includes(guildID)) {
+			if(!listGuildID.includes(guildID)){
 				guildSettingTable.deleteData([guildID]);
 				consoleLogTime(`${DefaultSettingValue}: ${guildID} is removed from the database.`);
 			}
