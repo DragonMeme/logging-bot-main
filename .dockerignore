@@ -69,6 +69,10 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# dotenv environment variables file
+*.env
+*.env.test
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
@@ -104,10 +108,15 @@ dist
 .git*/
 .gitignore
 **/*.md
-LICENSE
 
-# Linter configuration files
+# Exclude any README files as this contains potentially important information.
+!README*.md
+
+# Linter related files
 .eslint*
 
 # Package Lock JSON File
 package-lock.json
+
+# Testing files
+test/
