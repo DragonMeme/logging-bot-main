@@ -14,15 +14,15 @@ let initialised = false;
     Otherwise refresh database by updating servers the bot is in.
     Ensure bot is only in servers that meet the pre-requisites.
 */
-client.on("ready", async() => {
+client.on("ready", async () => {
 	if(initialised)consoleLogTime(`==> Reconnected and ready as ${client.user.tag}`);
 	else{
 		await client.user.setPresence({
-			game: { 
-				name: "Loading..." 
-			}, 
+			game: {
+				name: "Loading..."
+			},
 			status: "dnd"
-		}); 
+		});
 		consoleLogTime("==> Loading bot info and data!");
 		if (!existsSync("./data")) mkdirSync("./data");
 		readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
@@ -32,7 +32,7 @@ client.on("ready", async() => {
 			}
 		);
 		consoleLogTime("=>  Attempting to get bot invite link!");
-		try{ 
+		try{
 			const configJSON = JSON.parse(readFileSync("./data/config.json").toString());
 			if(!configJSON.invite) throw Error("Missing Invite Link! Now it is being generated!");
 			else{
@@ -55,13 +55,13 @@ client.on("ready", async() => {
 		}
 		initialise(client);
 		await client.user.setPresence({
-			game:{ 
-				name: `${prefix}help | @${client.user.username} help` 
-			}, 
+			game:{
+				name: `${prefix}help | @${client.user.username} help`
+			},
 			status: "online"
 		});
 		consoleLogTime(`==> Loaded and logged in as ${client.user.tag}!`);
-        
+
 		invalidGuildList().forEach(guildID => client.guilds.find(guild => guild.id === guildID).leave());
 		initialised = true;
 	}
@@ -71,11 +71,11 @@ client.on("ready", async() => {
     The main place to supposedly run commands by users.
     Also the most commonly occuring event for the bot to respond to.
 */
-client.on("message", async(message) => {
+client.on("message", async (message) => {
 	if(message.author.bot) return;
 	if(!["available", "online"].includes(client.user.presence.status)) if(!isBotOwner(message)) return;
 	if(message.channel.type === "text"){// DM user inability to send messages in said channel.
-		if(!message.channel.permissionsFor(client.user.id).has("SEND_MESSAGES")){ 
+		if(!message.channel.permissionsFor(client.user.id).has("SEND_MESSAGES")){
 			const channelID = message.channel.id;
 			message.author.send(`Missing permission \`SEND MESSAGES\` in <#${channelID}>, please grant me it!`)
 				.catch(); // Case that both the channel and author DMs unavailable.
@@ -85,7 +85,7 @@ client.on("message", async(message) => {
 	const content = message.content.trim();
 	const prefixRegex = new RegExp(`^(${prefix}|<@${client.user.id}> |<@!${client.user.id}> )`);
 	if(!content.match(prefixRegex)) return;
-    
+
 	const startsWithPrefix = message.content.startsWith(prefix);
 	const listVariables = content.slice(prefix.length).split(/\s+/);
 	const firstArgument = startsWithPrefix ? listVariables[0].toLowerCase() : listVariables[1].toLowerCase();
@@ -121,12 +121,12 @@ client.on("message", async(message) => {
 	}
 });
 
-/* 
-    The bot that is invited to a guild must have more than 50 human members, 
-    or has the bot owner as the owner of the guild, otherwise bot leaves 
+/*
+    The bot that is invited to a guild must have more than 50 human members,
+    or has the bot owner as the owner of the guild, otherwise bot leaves
     guild automatically.
 */
-client.on("guildCreate", async(guild) => {
+client.on("guildCreate", async (guild) => {
 	const guildID = guild.id;
 	consoleLogTime(`Guild ID ${guildID} attempted to add bot to server.`);
 	if(guild.members.filter(member => !member.user.bot).size < 50){ // Do not add guild to database.
@@ -135,11 +135,11 @@ client.on("guildCreate", async(guild) => {
 	return createData([guildID]);
 });
 
-/* 
+/*
     Ensure to remove the guild setting of servers that the bot is kicked from.
     This is to ensure that the database space is conserved.
 */
-client.on("guildDelete", async(guild) => {
+client.on("guildDelete", async (guild) => {
 	const guildID = guild.id;
 	consoleLogTime(`Left guild (ID: ${guildID})`);
 	if(readData(guildID, "G")) deleteData([guildID]);
@@ -149,9 +149,9 @@ client.on("guildDelete", async(guild) => {
 	Ensure that when the client updates its username, its mention in the game status
 	is also set accordingly.
 */
-client.on("userUpdate", (oldUser, newUser) => {
+client.on("userUpdate", async (oldUser, newUser) => {
 	if(newUser.id === client.user.id){
-		if(oldUser.username !== newUser.username){ 
+		if(oldUser.username !== newUser.username){
 			client.user.setPresence({
 				game: { name: `${prefix}help | @${newUser.username} help` }
 			}).then(() => {
@@ -161,9 +161,9 @@ client.on("userUpdate", (oldUser, newUser) => {
 	}
 });
 
-client.on("debug", info => consoleLogTime(info));
-client.on("disconnect", () => consoleLogTime("==> I have disconnected!"));
-client.on("error", error => consoleLogTime(error.message));
-client.on("warn", info => consoleLogTime(info));
+client.on("debug", async (info) => consoleLogTime(info));
+client.on("disconnect", async () => consoleLogTime("==> I have disconnected!"));
+client.on("error", async (error) => consoleLogTime(error.message));
+client.on("warn", async (info) => consoleLogTime(info));
 
 client.login(process.env.BOT_TOKEN).catch(error => consoleLogTime(`${error}`));

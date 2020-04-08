@@ -16,11 +16,12 @@ module.exports = {
 	execute(message, otherArguments){
 		if(!["text", "dm"].includes(message.channel.type)) return;
 		switch(otherArguments.length){
-			case 0:{ // No supplied arguments.
+			case 0: // No supplied arguments.
+			{
 				let helpMessage = `**__${message.client.user.username} Help!__**\n`
                 + "Arguments closed with `[]` are optional.\nArguments closed with `<>` are required.\n"
                 + `Do not add \`[]\` and \`<>\` to your arguments (e.g. \`${process.env.PREFIX}help ping\`).\n\n`;
-            
+
 				readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
 					file => {
 						const { description, name, permissionLevel, parameters } = require(`./${file}`);
@@ -45,16 +46,16 @@ module.exports = {
 				message.channel.send(helpMessage).then(() => message.react("🤔").catch());
 				break;
 			}
-            
-			case 1:{ // Has an argument.
+
+			case 1: // Has an argument.
+			{
 				const argument = otherArguments[0];
 				try{
-					require.resolve(`./${argument.toLowerCase()}`); 
+					require.resolve(`./${argument.toLowerCase()}`);
 					const { description, examples, name, permissionLevel, parameters } = require(`./${argument.toLowerCase()}`);
 
 					// Ensure that users do not see bot owner commands and treat as non-existent command. Only the bot author may see bot-owner command.
 					if(!isBotOwner(message.author) && permissionLevel === 3) throw Error("Cannot Find Command!");
-                
 					let helpMessage = `**__COMMAND: ${name}__**\n${description}\n\n**Permission Level**: `;
 
 					switch(permissionLevel){
@@ -103,7 +104,6 @@ module.exports = {
 						helpMessage += `\n\n**${examples.length === 1 ? "Example Usage": "Example Usages"}**\n${exampleString}`;
 					}
 					message.channel.send(helpMessage).then(() => message.react("🤔").catch());
-                
 				}catch(e){
 					if(e.message.toLowerCase().includes("cannot find")){ // Invalid argument case.
 						message.channel.send(`Sorry, I do not support command \`${argument}\``);
@@ -111,8 +111,8 @@ module.exports = {
 				}
 				break;
 			}
-            
-			default: 
+
+			default:
 				message.channel.send("Too many arguments supplied.");
 		}
 	}
