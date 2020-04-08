@@ -22,27 +22,32 @@ Examples of unacceptable behavior by participants include:
 ## Coding Practice
 In order to contribute to this project, you must follow a set of rules in the format of coding which are below:
 
-1.) No using of AND statements (`&&` and/or `&`), use nested if statements instead.
-
+1.) No excessive use of AND statements (`&&` and/or `&`) especially combined to one condition, use nested if statements instead for this.
 Example:
 ```js
-// Not wanted
-if(a && b){
-  func1();
-}else{
-  func2();
+// Wanted as given statement is short enough.
+if(a && b) func1();
+else func2();
+
+// Not Wanted as condition statement is too long.
+if(message.guild.channels.cache.filter(mchannel => channel.id === targetChannelID) && message.author.id === process.env.AUTHORID) func1();
+else func2();
+
+/*
+  Example we want to run functions upon the given statements:
+  a && b: run func1()
+  a && c: run runc2()
+*/
+
+// Wanted (Checking for a is common so a should be checked only once)
+if(a){
+  if(b) func1();
+  else if(c) func2();
 }
 
-// Wanted
-if(a){
-  if(b){
-    func1();
-  }else{
-    func2();
-  }
-}else{
-  func2();
-}
+// Not Wanted (Nicer but a is being checked at most twice)
+if(a & b) func1();
+else if(a & c) func2();
 ```
 Reason: Putting multiple conditions in an if statement makes the overall condition harder for user to analyse. By using nested if statements, the condition flow makes the overall required condition easier to follow.
 
@@ -50,19 +55,27 @@ Reason: Putting multiple conditions in an if statement makes the overall conditi
 2.) Any string that has a variable component has to be closed with backticks while the strings without backticks to be closed with double quotation marks.
 ```js
 func1(){
-  // Wanted
+  // Wanted (double quotes)
   const missing = "fox";
 
-  // Wanted 
+  // Wanted (using backticks if you want to add a variable to a string constructor)
   const fullText = `This is a ${missing}.`;
 }
 
 func2(){
-  // Not Wanted 
+  // Not Wanted (single quotes)
   const missing = 'fox';
   
-  // Not Wanted
+  // Not Wanted (Adding string with a variable)
   const fullText = "This is a " + missing + ".";
+}
+
+func3(){
+  const missing = "dog";
+  
+  // However this is okay as the full text string is too long thus have to be split.
+  const fullText = `This sentence "The big brown fox junps over the lazy ${missing}" ` +
+    "actually uses all 26 letters of the full English alphabet";
 }
 
 ```
