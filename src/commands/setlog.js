@@ -36,9 +36,11 @@ module.exports = {
 					if(readData(guildID, setting) === channelID){ // Turn off activity type.
 						updateData(guildID, setting, null);
 						message.channel.send(`Activity Type \`${activityType}\` is now disabled!`);
-					}else{ // Turn on activity type.
-						updateData(guildID, setting, channelID);
-						message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+					}else{ // Turn on activity type, ensure bot can send embed to said channel.
+						if(message.channel.permissionsFor(message.guild.me).has("EMBED_LINKS")){
+							updateData(guildID, setting, channelID);
+							message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+						}else message.reply("Please grant me permission `EMBED_LINKS` in this channel!");
 					}
 				}else message.reply(`Invalid activityType \`${activityType}\``);
 				break;
@@ -55,9 +57,11 @@ module.exports = {
 					if(toggle === "on"){
 						if(readData(guildID, setting) === channelID){ // Invalid scenario.
 							message.reply("That activity type is already set to this channel!");
-						}else{ // Valid scenario as we are changing data.
-							updateData(guildID, setting, channelID);
-							message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+						}else{ // Valid scenario as we are changing data, ensure bot can send embed to said channel.
+							if(message.channel.permissionsFor(message.guild.me).has("EMBED_LINKS")){
+								updateData(guildID, setting, channelID);
+								message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+							}else message.reply("Please grant me permission `EMBED_LINKS` in this channel!");
 						}
 					}else if(toggle === "off"){
 						if(!readData(guildID, setting)){ // Invalid scenario.

@@ -103,14 +103,14 @@ function kickMember(message, targetMember, reason){
 				.setFooter(`Kicked Timestamp: ${getUTCTimeStamp(Date.now())}`);
 			return channelFound.send(embed).then(() => targetMember.kick(reason));
 		}
-		const messageString = "I require permissions `EMBED_LINKS` to post `user_kick` logs." +
+		const messageString = "I require permission `EMBED_LINKS` to post `user_kick` logs." +
 			"I have disabled logging this for now, you will have to re-enable this setting.";
 		return channelFound.send(messageString).then(() => targetMember.kick(reason));
 	}
 	// Unable to send message in logging channel.
 	updateData(guildIDToCheck, "UK", null);
 	const errorMessage = `Cannot log \`USER_KICKS\` to <#${channelFound.id}> as I do not have` +
-			"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" +
-			"Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
+		"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" +
+		"Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
 	return message.reply(errorMessage).then(() => targetMember.kick(reason));
 }
