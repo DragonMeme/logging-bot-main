@@ -1,7 +1,7 @@
-const { createData, deleteData, initialise, invalidGuildList, readData } = require("./database.js");
-const { Client, Collection } = require("discord.js");
+const { createData, deleteData, initialise, invalidGuildList, readData, updateData } = require("./database.js");
+const { Client, Collection, RichEmbed } = require("discord.js");
 const { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } = require("fs");
-const { consoleLogTime } = require("./common/logger.js");
+const { consoleLogTime, getUTCTimeStamp } = require("./common/logger.js");
 const { isModerator, isAdministrator, isBotOwner, isGuildOwner } = require("./common/permission_check.js");
 
 const prefix = process.env.PREFIX;
@@ -62,7 +62,7 @@ client.on("ready", async () => {
 		});
 		consoleLogTime(`==> Loaded and logged in as ${client.user.tag}!`);
 
-		invalidGuildList().forEach(guildID => client.guilds.find(guild => guild.id === guildID).leave());
+		invalidGuildList().forEach(guildID => client.guilds.get(guildID).leave());
 		initialised = true;
 	}
 });
@@ -118,6 +118,73 @@ client.on("message", async (message) => {
 			break;
 
 		default:
+	}
+});
+
+/*
+	Message Deletes should trigger the bot to post message deletes on the logging channel.
+	Most of the error handling here are handled by channel updates.
+	The error handling here is for just in case the bot is down when users change permissions.
+*/
+client.on("messageDelete", async (message) => {
+	if(message.author.bot) return;
+	const targetChannelID = readData(message.guild.id, "UMD");
+	if(targetChannelID){
+		const targetChannel = message.guild.channels.get(targetChannelID);
+		if(targetChannel.permissionsFor(message.guild.me).has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+			if(targetChannel.permissionsFor(message.guild.me).has(["EMBED_LINKS"])){ // Ensure can post embeds.
+				const embed = new RichEmbed()
+					.setTitle("🗑️ **__Deleted Message__** 🗑️")
+					.addField("**Author**", `<@${message.author.id}>`, true)
+					.addField("**Channel**", `<#${message.channel.id}>`, true)
+					.addField("**Created Timestamp**", `\`${getUTCTimeStamp(message.createdAt)}\``)
+					.addField("**Message Content**", message.content)
+					.setFooter(`Deleted Timestamp: ${getUTCTimeStamp(Date.now())}`);
+				targetChannel.send(embed);
+			}else{
+				updateData(message.guild.id, "UMD", null);
+				const messageString = "I require permissions `EMBED_LINKS` to post `message_delete` logs." +
+					"I have disabled logging this for now, you will have to re-enable this setting.";
+				targetChannel.send(messageString);
+			}
+		}else{ // In the case the bot does not have permission to post in said channel.
+			updateData(message.guild.id, "UMD", null);
+		}
+	}
+});
+
+/*
+	Message Updates should trigger the bot to post message updates on the logging channel.
+	Most of the error handling here are handled by channel updates.
+	The error handling here is for just in case the bot is down when users change permissions.
+*/
+client.on("messageUpdate", async (oldMessage, newMessage) => {
+	if(oldMessage.author.bot) return;
+	const targetChannelID = readData(oldMessage.guild.id, "UME");
+	if(targetChannelID){
+		const targetChannel = newMessage.guild.channels.get(targetChannelID);
+		if(oldMessage.cleanContent === newMessage.cleanContent) return;
+		if(targetChannel.permissionsFor(newMessage.guild.me).has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+			if(targetChannel.permissionsFor(newMessage.guild.me).has(["EMBED_LINKS"])){ // Ensure can post embeds.
+				const embed = new RichEmbed()
+					.setTitle("📝 **__Edited Message__** 📝")
+					.setURL(oldMessage.url)
+					.addField("**Author**", `<@${oldMessage.author.id}>`, true)
+					.addField("**Channel**", `<#${oldMessage.channel.id}>`, true)
+					.addField("**Created Timestamp**", `\`${getUTCTimeStamp(oldMessage.createdAt)}\``)
+					.addField("**Old Message Content**", oldMessage.content)
+					.addField("**New Message Content**", newMessage.content)
+					.setFooter(`Edited Timestamp: ${getUTCTimeStamp(newMessage.editedAt)}`);
+				targetChannel.send(embed);
+			}else{
+				updateData(newMessage.guild.id, "UMD", null);
+				const messageString = "I require permissions `EMBED_LINKS` to post `message_edit` logs." +
+					"I have disabled logging this for now, you will have to re-enable this setting.";
+				targetChannel.send(messageString);
+			}
+		}else{ // In the case the bot does not have permission to post in said channel.
+			updateData(oldMessage.guild.id, "UME", null);
+		}
 	}
 });
 

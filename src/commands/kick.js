@@ -1,6 +1,7 @@
 const { isModerator, isAdministrator, isGuildOwner } = require("../common/permission_check.js");
 const { readData, updateData } = require("../database.js");
-const { discordLogTime, discordBasicUserDisplay } = require("../common/logger.js");
+const { discordBasicUserDisplay, getUTCTimeStamp } = require("../common/logger.js");
+const { RichEmbed } = require("discord.js");
 
 module.exports = {
 	name: "kick",
@@ -25,7 +26,7 @@ module.exports = {
 			const obtainedUserID = /\d+/.exec(otherArguments[0]);
 
 			// Obtain member to kick.
-			const memberToKick = message.guild.members.find(member => member.id === obtainedUserID[0]);
+			const memberToKick = message.guild.members.get(obtainedUserID[0]);
 			switch(otherArguments.length){
 				case 0: // No arguments supplied.
 					return message.reply("You have not supplied a member of the guild for me to kick.");
@@ -33,7 +34,8 @@ module.exports = {
 				case 1: // Only the user is supplied.
 					return attemptKickMember(message, memberToKick, null);
 
-				default:{// A reason is supplied as well as the user.
+				default: // A reason is supplied as well as the user.
+				{
 					const reason = otherArguments.slice(1).join(" ");
 					return attemptKickMember(message, memberToKick, reason);
 				}
@@ -71,13 +73,12 @@ function kickMember(message, targetMember, reason){
 	if(!logsForUserKickedChannelID){ // Logging for User Kicks not set.
 		return targetMember.kick(reason);
 	}
-	const channelFound = message.guild.channels.find(channel => channel.id === logsForUserKickedChannelID);
+	const channelFound = message.guild.channels.get(logsForUserKickedChannelID);
 	/*
-            These checks may not be needed as most can be handled by setlog/quicksetlog commands,
-            channelUpdate and channelDelete events.
-            However these check are most useful in the event the bot is shut down and restarted
-            and the requirements are not fetched by then.
-        */
+		User Kicks should trigger the bot to post user kicks on the logging channel.
+		Most of the error handling here are handled by channel updates.
+		The error handling here is for just in case the bot is down when users change permissions.
+	*/
 	if(!channelFound){ // Channel is deleted/missing.
 		updateData(guildIDToCheck, "UK", null);
 		const errorMessage = "The logging channel for `USER_KICKS` was not found.\n" +
@@ -89,22 +90,27 @@ function kickMember(message, targetMember, reason){
 	}else
 	// Ensure the bot can send messages in the logging channel.
 	if(channelFound.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL"])){
-		const msgAuthor = message.member; // Member that requested the kick.
-		const roleUserString = isGuildOwner(message.guild, msgAuthor.id) ? "Guild Owner" :
-			isAdministrator(msgAuthor) ? "Administrator" : "Moderator";
-		const messageString = "👢 **__Kick Command Initiated__** 👢\n" +
-			`**Kicked Member** (${discordBasicUserDisplay(targetMember)})\n` +
-			`**Requested by ${roleUserString}** (${discordBasicUserDisplay(msgAuthor)})\n` +
-			(!reason ? "" : `**With reason**:\n\`\`\`\n${reason}\n\`\`\``);
-		return channelFound.send(discordLogTime(messageString)).then(() => {
-			targetMember.kick(reason);
-		});
+		if(channelFound.permissionsFor(message.guild.me).has(["EMBED_LINKS"])){ // Ensure can post embeds.
+			const authorID = message.author.id;
+			const roleUserString = isGuildOwner(message.guild, authorID) ? "Guild Owner" :
+				isAdministrator(authorID) ? "Administrator" : "Moderator";
+			const reasonString = reason ? `**With reason**:\n${reason}` : "";
+			const embed = new RichEmbed()
+				.setTitle("👢 **__Kick Command Initiated__** 👢")
+				.setDescription(`**Kicked Member** is <@${targetMember.id}>\n${reasonString}`)
+				.addField("Requested By", `<@${authorID}>`, true)
+				.addField("Requester Status", roleUserString)
+				.setFooter(`Kicked Timestamp: ${getUTCTimeStamp(Date.now())}`);
+			return channelFound.send(embed).then(() => targetMember.kick(reason));
+		}
+		const messageString = "I require permissions `EMBED_LINKS` to post `user_kick` logs." +
+			"I have disabled logging this for now, you will have to re-enable this setting.";
+		return channelFound.send(messageString).then(() => targetMember.kick(reason));
 	}
+	// Unable to send message in logging channel.
 	updateData(guildIDToCheck, "UK", null);
 	const errorMessage = `Cannot log \`USER_KICKS\` to <#${channelFound.id}> as I do not have` +
-		"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" +
-		"Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
-	return message.reply(errorMessage).then(() => {
-		targetMember.kick(reason);
-	});
+			"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" +
+			"Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
+	return message.reply(errorMessage).then(() => targetMember.kick(reason));
 }

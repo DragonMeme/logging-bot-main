@@ -27,12 +27,14 @@ module.exports = {
 			}
 
 			case 1: // One argument supplied.
+			{
 				if(Object.keys(SettingTypesIndexes).includes(otherArguments[0])){
 					const max = SettingTypesIndexes[otherArguments[0]].max;
 					const min = SettingTypesIndexes[otherArguments[0]].min;
 					message.channel.send(printStatusLog(max, min, guildID));
 				}else message.channel.send(`Invalid logging category \`${otherArguments[0]}\`!`);
 				break;
+			}
 
 			default:
 				message.channel.send("Too many arguments supplied.");
