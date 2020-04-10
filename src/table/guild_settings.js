@@ -50,6 +50,15 @@ module.exports = class Guild_Setting{
 		return listDB;
 	}
 
+	// GET: Returns the entire row given the Guild ID exists.
+	readDataRow(guildID){
+		const sql = `SELECT * FROM "${this.tableName}" WHERE "${DefaultSettingValue}" = ?`;
+		const db = new sqlite3("data/server.db", {"verbose": null });
+		const info = db.prepare(sql).get(guildID);
+		db.close();
+		return info;
+	}
+
 	// GET: Returns a row entry given the Guild ID exists.
 	readData(guildID, category){
 		const categoryExists = Object.keys(SettingValues).includes(category);

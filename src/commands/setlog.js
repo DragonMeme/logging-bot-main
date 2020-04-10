@@ -38,8 +38,17 @@ module.exports = {
 						message.channel.send(`Activity Type \`${activityType}\` is now disabled!`);
 					}else{ // Turn on activity type, ensure bot can send embed to said channel.
 						if(message.channel.permissionsFor(message.guild.me).has("EMBED_LINKS")){
-							updateData(guildID, setting, channelID);
-							message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+							if(setting === "BD"){
+								if(message.channel.permissionsFor(message.guild.me).has("ATTACH_FILES")){
+									updateData(guildID, setting, channelID);
+									message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+								}else{
+									message.reply("Please grant me permission `ATTACH_FILES` in this channel!");
+								}
+							}else{
+								updateData(guildID, setting, channelID);
+								message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
+							}
 						}else message.reply("Please grant me permission `EMBED_LINKS` in this channel!");
 					}
 				}else message.reply(`Invalid activityType \`${activityType}\``);

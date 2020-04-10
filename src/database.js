@@ -61,6 +61,10 @@ module.exports = {
 		return invalidGuildList.splice(0, invalidGuildList.length);
 	},
 
+	readDataRow : function(guildID){
+		return guildSettingTable.readDataRow(guildID);
+	},
+
 	// CRUD Commands.
 	createData : function(listGuildID){
 		guildSettingTable.createData(listGuildID);

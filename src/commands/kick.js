@@ -87,10 +87,11 @@ function kickMember(message, targetMember, reason){
 		return message.reply(errorMessage).then(() => {
 			targetMember.kick(reason);
 		});
-	}else
+	}
+	const botPermissions = channelFound.permissionsFor(message.guild.me);
 	// Ensure the bot can send messages in the logging channel.
-	if(channelFound.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL"])){
-		if(channelFound.permissionsFor(message.guild.me).has(["EMBED_LINKS"])){ // Ensure can post embeds.
+	if(botPermissions.has(["SEND_MESSAGES", "VIEW_CHANNEL"])){
+		if(botPermissions.has("EMBED_LINKS")){ // Ensure can post embeds.
 			const authorID = message.author.id;
 			const roleUserString = isGuildOwner(message.guild, authorID) ? "Guild Owner" :
 				isAdministrator(authorID) ? "Administrator" : "Moderator";
@@ -103,14 +104,15 @@ function kickMember(message, targetMember, reason){
 				.setFooter(`Kicked Timestamp: ${getUTCTimeStamp(Date.now())}`);
 			return channelFound.send(embed).then(() => targetMember.kick(reason));
 		}
-		const messageString = "I require permission `EMBED_LINKS` to post `user_kick` logs." +
+		// Unable to post embeds.
+		const messageString = "I require permission `EMBED_LINKS` to post `user_kicked` logs." +
 			"I have disabled logging this for now, you will have to re-enable this setting.";
 		return channelFound.send(messageString).then(() => targetMember.kick(reason));
 	}
 	// Unable to send message in logging channel.
 	updateData(guildIDToCheck, "UK", null);
-	const errorMessage = `Cannot log \`USER_KICKS\` to <#${channelFound.id}> as I do not have` +
-		"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `USER_KICKS`.\n" +
-		"Please ask an administrator to re-setup for logging `USER_KICKS` if needed.";
+	const errorMessage = `Cannot log \`user_kicked\` logs to <#${channelFound.id}> as I do not have` +
+		"`SEND_MESSAGES` or `READ_MESSAGES` permissions.\n" +
+		"Please ask an administrator to re-setup for logging `user_kicked` if needed.";
 	return message.reply(errorMessage).then(() => targetMember.kick(reason));
 }

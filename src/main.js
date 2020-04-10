@@ -1,12 +1,16 @@
-const { createData, deleteData, initialise, invalidGuildList, readData, updateData } = require("./database.js");
+const { createData, deleteData, initialise, invalidGuildList, readData, readDataRow, updateData } = require("./database.js");
 const { Client, Collection, RichEmbed, Attachment } = require("discord.js");
 const { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } = require("fs");
+const { generateSetLogParameters } = require("./common/guild_setting.js");
+const { SettingValues } = require("./common/guild_setting.json");
 const { consoleLogTime, getUTCTimeStamp } = require("./common/logger.js");
 const { isModerator, isAdministrator, isBotOwner, isGuildOwner } = require("./common/permission_check.js");
 
 const prefix = process.env.PREFIX;
 const client = new Client();
 client.commands = new Collection();
+const loggingTypes = generateSetLogParameters;
+const keySettingValues = Object.keys(SettingValues);
 let initialised = false;
 
 /*
@@ -132,8 +136,9 @@ client.on("messageDelete", async (message) => {
 	const targetChannelID = readData(message.guild.id, "UMD");
 	if(targetChannelID){
 		const targetChannel = message.guild.channels.get(targetChannelID);
-		if(targetChannel.permissionsFor(message.guild.me).has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
-			if(targetChannel.permissionsFor(message.guild.me).has("EMBED_LINKS")){ // Ensure can post embeds.
+		const botPermissions = targetChannel.permissionsFor(message.guild.me);
+		if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+			if(botPermissions.has("EMBED_LINKS")){ // Ensure can post embeds.
 				const embed = new RichEmbed()
 					.setTitle("🗑️ **__Deleted Message__** 🗑️")
 					.addField("**Author**", `<@${message.author.id}>`, true)
@@ -165,9 +170,10 @@ client.on("messageUpdate", async (oldMessage, newMessage) => {
 	const targetChannelID = readData(oldMessage.guild.id, "UME");
 	if(targetChannelID){
 		const targetChannel = newMessage.guild.channels.get(targetChannelID);
+		const botPermissions = targetChannel.permissionsFor(newMessage.guild.me);
 		if(oldMessage.cleanContent === newMessage.cleanContent) return;
-		if(targetChannel.permissionsFor(newMessage.guild.me).has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
-			if(targetChannel.permissionsFor(newMessage.guild.me).has("EMBED_LINKS")){ // Ensure can post embeds.
+		if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+			if(botPermissions.has("EMBED_LINKS")){ // Ensure can post embeds.
 				const embed = new RichEmbed()
 					.setTitle("📝 **__Edited Message__** 📝")
 					.setURL(oldMessage.url)
@@ -204,8 +210,13 @@ client.on("messageDeleteBulk", async (messages) => {
 	const channelID = informationMessage.guild.id;
 	const targetChannel = informationMessage.guild.channels.get(targetChannelID);
 	if(targetChannel){ // Target channel exists
-		if(targetChannel.permissionsFor(informationMessage.guild.me).has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
-			if(targetChannel.permissionsFor(informationMessage.guild.me).has(["EMBED_LINKS", "ATTACH_FILES"])){
+		const botAsMember = informationMessage.guild.me;
+		const botPermissions = targetChannel.permissionsFor(botAsMember);
+		if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+			const currentPermissions = [ // Reduce the amount of times to call checking for permissions.
+				botPermissions.has("ATTACH_FILES"), botPermissions.has("EMBED_LINKS")
+			];
+			if(currentPermissions[0] && currentPermissions[1]){ // Can embed links and attach files
 				const channelIDPath = `./data/${guildID}/${channelID}`;
 				const sortedMessages = messages.sort((m1, m2) => m1.createdTimestamp - m2.createdTimestamp);
 				if(!existsSync(channelIDPath)){
@@ -222,9 +233,10 @@ client.on("messageDeleteBulk", async (messages) => {
 					appendFileSync(textFilePath, `${timeStamp} <@${authorID}> ${authorTag}:\n${content}\n\n`);
 				});
 				const embed = new RichEmbed()
-					.setTitle("♻️ **__Mass Message Delete__** ♻️")
-					.setDescription("Message content is dumped in the attached text file above. ☝️")
+					.setTitle("♻️ **__Bulk Message Delete__** ♻️")
+					.setDescription("Message content is dumped in the attached text file.")
 					.addField("Channel", `<#${informationMessage.channel.id}>`)
+					.addField("Amount deleted", messages.size)
 					.setFooter(`Mass Deleted Timestamp: ${getUTCTimeStamp(Date.now())}`);
 				targetChannel.send({
 					embed: embed,
@@ -232,26 +244,82 @@ client.on("messageDeleteBulk", async (messages) => {
 				});
 			}else{ // Missing either ATTACH_FILES and EMBED_LINKS permission for the bot to use logging channel.
 				updateData(guildID, "DB", null);
-				const currentPermissions = [ // One of them has to be false.
-					targetChannel.permissionsFor(informationMessage.guild.me).has("ATTACH_FILES"),
-					targetChannel.permissionsFor(informationMessage.guild.me).has("EMBED_LINKS")
-				];
-				const messageString = "I require permission" + (currentPermissions.length === 1 ? "" : "s") +
+				const messageString = "I require permission" + // At least one of the permissions are missing.
+					(currentPermissions.filter(p => !p).length === 1 ? "" : "s") + // Grammer for singular false permissions
 					(currentPermissions[0] ? " `EMBED_LINKS`" : " `ATTACH_FILES`") +
 					(currentPermissions[1] ? "" : " and `EMBED_LINKS`") +
-					" to post `message_edit` logs." +
+					" to post `bulk_delete` logs." +
 					"I have disabled logging this for now, you will have to re-enable this setting.";
 				targetChannel.send(messageString);
 			}
 		}else{ // When bot is unable to send message to channel / view channel
 			updateData(guildID, "DB", null);
-			const errorMessage = `Cannot log \`BULK_DELETE\` to <#${targetChannelID}> as I do not have` +
-				"`SEND_MESSAGES` or `READ_MESSAGES` permission so I no longer will log `BULK_DELETE`.\n" +
-				"Please ask an administrator to re-setup for logging `BULK_DELETE` if needed.";
+			const errorMessage = `Cannot log \`bulk_delete\` logs to <#${targetChannelID}> as I do not have` +
+				"`SEND_MESSAGES` or `READ_MESSAGES` permissions.\n" +
+				"Please ask an administrator to re-setup for logging `bulk_delete` logs if needed.";
 			informationMessage.channel.send(errorMessage);
 		}
 	}else{ // When looging is deleted.
 		updateData(guildID, "BD", null);
+	}
+});
+
+/*
+	During any channel update, assure that bot still has the permissions to post said logs.
+*/
+client.on("channelUpdate", async (oldChannel, newChannel) => {
+	if(["news", "text"].includes(newChannel.type)){ // Ensure we are checking Guild text channels.
+		const botAsMember = newChannel.guild.me;
+		const currentBotPermissions = newChannel.permissionsFor(botAsMember);
+
+		// If permissions for bot for the updated channel has not changed, do not do anything.
+		if(currentBotPermissions.equals(oldChannel.permissionsFor(botAsMember))) return;
+
+		// Case that permission changes.
+		const guildID = newChannel.guild.id;
+		const guildSettingRow = readDataRow(guildID);
+		const checkingChannelIDs = Object.values(guildSettingRow);
+		const channelIDToCheck = newChannel.id;
+
+		if(checkingChannelIDs.includes(channelIDToCheck)){ // Ensure channel checked is used for logging.
+
+			// Only limit to logging channel ID of the channel that is being updated.
+			const checkingChannelKeys = keySettingValues.filter(key =>
+				guildSettingRow[SettingValues[key]] === channelIDToCheck
+			);
+			if(currentBotPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+				if(currentBotPermissions.has("EMBED_LINKS")){ // Ensure can still send embeds.
+					// Check that the channel updated for logging bulk delete can still attach files.
+					if(checkingChannelKeys.includes("BD")){
+						if(!currentBotPermissions.has("ATTACH_FILES")){
+							updateData(guildID, "BD", null);
+							const messageString = "I am no longer able to log `bulk_delete`.\n" +
+								"I have automatically disabled logging `bulk_delete` for now!";
+							newChannel.send(messageString);
+						}
+					}
+				}else{ // Can not send embed link to target channel but can send messages.
+					const indexKeys = []; // This should contain at least one value.
+					checkingChannelKeys.forEach(key => {
+						updateData(guildID, key, null);
+						indexKeys.push(keySettingValues.indexOf(key));
+					});
+					const sizeKeysArray = indexKeys.length;
+					let messageString = "I am no longer able to log ";
+					indexKeys.forEach((key, i) => { // Label all disabled logging types.
+						if(i === sizeKeysArray - 2) messageString += `\`${loggingTypes[key]}\` and `;
+						else if (i === sizeKeysArray - 1) messageString += `\`${loggingTypes[key]}\``;
+						else messageString += `\`${loggingTypes[key]}\`, `;
+					});
+					messageString += ".\nI have automatically disabled logging them for now!";
+					newChannel.send(messageString);
+				}
+			}else{ // Can not send/read target channel.
+				checkingChannelKeys.forEach(key => {
+					updateData(guildID, key, null);
+				});
+			}
+		}
 	}
 });
 
@@ -295,7 +363,13 @@ client.on("userUpdate", async (oldUser, newUser) => {
 	}
 });
 
-client.on("debug", async (info) => consoleLogTime(info));
+client.on("debug", async (info) => { // Censor bot token in debug logs.
+	if(info.includes(process.env.BOT_TOKEN)){
+		const botToken = process.env.BOT_TOKEN;
+		const censored = info.slice(info.indexOf(botToken)).replace(/./g, "*");
+		consoleLogTime(info.replace(botToken, censored));
+	}else consoleLogTime(info);
+});
 client.on("disconnect", async () => consoleLogTime("==> I have disconnected!"));
 client.on("error", async (error) => consoleLogTime(error.message));
 client.on("warn", async (info) => consoleLogTime(info));
