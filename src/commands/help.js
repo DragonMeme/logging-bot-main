@@ -5,6 +5,7 @@ module.exports = {
 	name: "help",
 	description: "DMs you about the command(s) the bot can do.",
 	examples: ["help", "help ping"],
+	guildOnly: false,
 	permissionLevel: 0,
 	parameters: {
 		command: {
@@ -14,7 +15,6 @@ module.exports = {
 		}
 	},
 	execute(message, otherArguments){
-		if(!["text", "dm"].includes(message.channel.type)) return;
 		switch(otherArguments.length){
 			case 0: // No supplied arguments.
 			{

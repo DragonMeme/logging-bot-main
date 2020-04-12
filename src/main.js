@@ -93,8 +93,14 @@ client.on("message", async (message) => {
 	const startsWithPrefix = message.content.startsWith(prefix);
 	const listVariables = content.slice(prefix.length).split(/\s+/);
 	const firstArgument = startsWithPrefix ? listVariables[0].toLowerCase() : listVariables[1].toLowerCase();
-	if(!client.commands.has(firstArgument)) return;
+	if(!client.commands.has(firstArgument)) return; // Check supported argument.
 	const command = client.commands.get(firstArgument);
+	if(command.guildOnly){
+		if(message.channel.type === "dm"){ // Any guild only commands used in direct messages will send this.
+			message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
+		}
+		return;
+	}
 	const otherArguments = startsWithPrefix ? listVariables.slice(1) : listVariables.slice(2);
 	switch(command.permissionLevel){
 		case 0: // Normal User
@@ -102,17 +108,11 @@ client.on("message", async (message) => {
 			break;
 
 		case 1: // Moderator
-			if(message.channel.type === "dm"){
-				message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
-			}
 			if(isModerator(message.member)) command.execute(message, otherArguments);
 			else message.reply("You have insufficient permissions to run this command.");
 			break;
 
 		case 2: // Administrator
-			if(message.channel.type === "dm"){
-				message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
-			}
 			if(isAdministrator(message.member)) command.execute(message, otherArguments);
 			else message.reply("You have insufficient permissions to run this command.");
 			break;
@@ -175,7 +175,7 @@ client.on("messageUpdate", async (oldMessage, newMessage) => {
 	if(targetChannelID){
 		const targetChannel = newMessage.guild.channels.get(targetChannelID);
 		const botPermissions = targetChannel.permissionsFor(newMessage.guild.me);
-		if(oldMessage.cleanContent === newMessage.cleanContent) return;
+		if(oldMessage.content === newMessage.content) return;
 		if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
 			if(botPermissions.has("EMBED_LINKS")){ // Ensure can post embeds.
 				const embed = new RichEmbed()

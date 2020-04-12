@@ -8,6 +8,7 @@ module.exports = {
 	name: "setlog",
 	description: "Allows the administrator to set current channel for the bot to log specific activity.",
 	examples: ["setlog vc_joins true", "setlog message_delete"],
+	guildOnly: true,
 	permissionLevel: 2,
 	parameters: {
 		activityType: {

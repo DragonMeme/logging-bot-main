@@ -8,6 +8,7 @@ module.exports = {
 	name: "",
 	description: ".",
 	examples: [""],
+	guildOnly: true,
 	permissionLevel: 0,
 	parameters: {
 		parameter1: {

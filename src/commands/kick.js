@@ -7,6 +7,7 @@ module.exports = {
 	name: "kick",
 	description: "Kicks a member from your server.",
 	examples: ["kick 1234567890123456789", "kick @UserExample Spamming ads"],
+	guildOnly: true,
 	permissionLevel: 1,
 	parameters: {
 		member: {

@@ -5,6 +5,7 @@ module.exports = {
 	name: "statuslog",
 	description: "Prints which channel the specific activities are being logged to.",
 	examples: ["statuslog", "statuslog user"],
+	guildOnly: true,
 	permissionLevel: 2,
 	parameters: {
 		category: {
@@ -15,7 +16,6 @@ module.exports = {
 		}
 	},
 	execute(message, otherArguments){
-		if(message.channel.type !== "text") return;
 		const guildID = message.guild.id;
 		switch(otherArguments.length){
 			case 0: // No other arguments needed.
