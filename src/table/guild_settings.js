@@ -68,7 +68,7 @@ module.exports = class Guild_Setting{
 		const option = categoryIndex >= 0 ? category : DefaultSettingValue;
 		const sql = `SELECT "${option}" FROM "${this.tableName}" WHERE "${DefaultSettingValue}" = ?`;
 		const info = sqlite3.prepare(sql).raw().get(guildID);
-		return info ? info[categoryIndex] : null;
+		return info ? info[0] : null;
 	}
 
 	// PUT: Modify data on a row given appropriate category.

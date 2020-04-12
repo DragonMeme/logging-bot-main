@@ -98,8 +98,8 @@ client.on("message", async (message) => {
 	if(command.guildOnly){
 		if(message.channel.type === "dm"){ // Any guild only commands used in direct messages will send this.
 			message.reply(`Sorry, command \`${firstArgument}\` is not supported in Direct Messages.`);
+			return;
 		}
-		return;
 	}
 	const otherArguments = startsWithPrefix ? listVariables.slice(1) : listVariables.slice(2);
 	switch(command.permissionLevel){
@@ -217,8 +217,7 @@ client.on("messageDeleteBulk", async (messages) => {
 	const targetChannel = informationMessage.guild.channels.get(targetChannelID);
 	const updateObject = [[guildID, "BD", null]]; // Object to send to DB on failure to log bulk_delete
 	if(targetChannel){ // Target channel exists
-		const botAsMember = informationMessage.guild.me;
-		const botPermissions = targetChannel.permissionsFor(botAsMember);
+		const botPermissions = targetChannel.permissionsFor(informationMessage.guild.me);
 		if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
 			const currentPermissions = [ // Reduce the amount of times to call checking for permissions.
 				botPermissions.has("ATTACH_FILES"), botPermissions.has("EMBED_LINKS")
@@ -272,7 +271,65 @@ client.on("messageDeleteBulk", async (messages) => {
 });
 
 /*
+	User Joins should trigger the bot to post user_join logs on the logging channel.
+	Most of the error handling here are handled by channel updates.
+	The error handling here is for just in case the bot is down when users change permissions.
+*/
+client.on("guildMemberAdd", async (member) => {
+	const guild = member.guild;
+	const targetChannelID = readData(guild.id, "UJ");
+	if(!targetChannelID) return;
+	const targetChannel = guild.channels.get(targetChannelID);
+	const botPermissions = targetChannel.permissionsFor(guild.me);
+	const updateObject = [[guild.id, "UJ", null]]; // Object to send to DB on failure to log bulk_delete
+	if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+		if(botPermissions.has("EMBED_LINKS")){
+			const embed = new RichEmbed()
+				.setTitle("⭐ **__User Joined__** ⭐")
+				.addField("New User", `<@${member.id}>`)
+				.setFooter(`User (ID ${member.id}) joined at ${getUTCTimeStamp(member.joinedTimestamp)}`);
+			targetChannel.send(embed);
+		}else{ // When bot is unable to send message to channel / view channel
+			updateData(updateObject);
+			const messageString = "I require permission `EMBED_LINKS` to post `user_join` logs." +
+				"I have disabled logging this for now, you will have to re-enable this setting.";
+			targetChannel.send(messageString);
+		}
+	}else updateData(updateObject);
+});
+
+/*
+	User Leaves should trigger the bot to post user_leaves logs on the logging channel.
+	Most of the error handling here are handled by channel updates.
+	The error handling here is for just in case the bot is down when users change permissions.
+*/
+client.on("guildMemberRemove", async (member) => {
+	const guild = member.guild;
+	const targetChannelID = readData(guild.id, "UL");
+	if(!targetChannelID) return;
+	const targetChannel = guild.channels.get(targetChannelID);
+	const botPermissions = targetChannel.permissionsFor(guild.me);
+	const updateObject = [[guild.id, "UL", null]]; // Object to send to DB on failure to log bulk_delete
+	if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+		if(botPermissions.has("EMBED_LINKS")){
+			const embed = new RichEmbed()
+				.setTitle("🚪 **__User Left__** 🚪")
+				.addField("User", `<@${member.id}>`)
+				.addField("Member Since", `\`${getUTCTimeStamp(member.joinedTimestamp)}\``)
+				.setFooter(`User (ID ${member.id}) left at ${getUTCTimeStamp(Date.now())}`);
+			targetChannel.send(embed);
+		}else{ // When bot is unable to send message to channel / view channel
+			updateData(updateObject);
+			const messageString = "I require permission `EMBED_LINKS` to post `user_leave` logs." +
+				"I have disabled logging this for now, you will have to re-enable this setting.";
+			targetChannel.send(messageString);
+		}
+	}else updateData(updateObject);
+});
+
+/*
 	During any channel update, assure that bot still has the permissions to post said logs.
+	Most of the worst case scenarios of logging channels are handled here.
 */
 client.on("channelUpdate", async (oldChannel, newChannel) => {
 	if(["news", "text"].includes(newChannel.type)){ // Ensure we are checking Guild text channels.
