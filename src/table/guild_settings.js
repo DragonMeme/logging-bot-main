@@ -43,15 +43,23 @@ module.exports = class Guild_Setting{
 	// GET: Returns the whole table in JSON format.
 	readDataBase(){
 		const sql = `SELECT * FROM "${this.tableName}"`;
-		const listDB = sqlite3.prepare(sql).raw().all();
-		return listDB;
+		return sqlite3.prepare(sql).raw().all();
+	}
+
+	// GET: Returns the list of Guild IDs.
+	readGuilds(){
+		const sql = `SELECT DISTINCT "${DefaultSettingValue}" FROM "${this.tableName}"`;
+		const listData = [];
+		sqlite3.prepare(sql).raw().all().forEach(data => {
+			listData.push(data[0]); // Ensure return Array<string> and not Array<Array<string>>
+		});
+		return listData;
 	}
 
 	// GET: Returns the entire row given the Guild ID exists.
 	readDataRow(guildID){
 		const sql = `SELECT * FROM "${this.tableName}" WHERE "${DefaultSettingValue}" = ?`;
-		const info = sqlite3.prepare(sql).get(guildID);
-		return info;
+		return sqlite3.prepare(sql).get(guildID);
 	}
 
 	// GET: Returns a row entry given the Guild ID exists.
@@ -65,28 +73,24 @@ module.exports = class Guild_Setting{
 
 	// PUT: Modify data on a row given appropriate category.
 	/*
-		Each input data in the input array must be of form:
+		Each input data in listData array must be of form:
 		[guildID, SettingValue, data (channel ID)]
 	*/
 	updateData(listData){
-		if(listData.length === 1){
-			const data = listData[0];
-			const categoryExists = availableCategory.includes(data[1]);
+		const validData = [];
+		listData.forEach(currentData => { // Insert vaid data to an array to pass to transaction.
+			const category = currentData[1];
+			const categoryExists = availableCategory.includes(category);
 			if(!categoryExists) return; // Do not go further if not setting a setting value.
-			const sql = `UPDATE "${this.tableName}" SET "${data[1]}" = ${data[2]} WHERE ` +
-				`"${DefaultSettingValue}" = ${data[0]}`;
-			sqlite3.prepare(sql).run();
-		}else{
-			let SQLString = "BEGIN TRANSACTION;\n";
+			validData.push(currentData);
+		});
+		if(validData.length === 0) return; // Do not perform expensive operation if no valid data.
+		const transaction = sqlite3.transaction(listData => { // Add different updates to transaction.
 			listData.forEach(currentData => {
-				const category = currentData[1];
-				const categoryExists = availableCategory.includes(category);
-				if(!categoryExists) return; // Do not go further if not setting a setting value.
-				SQLString += `UPDATE "${this.tableName}" SET "${category}" = ${currentData[2]} WHERE ` +
-					`"${DefaultSettingValue}" = ${currentData[0]};\n`;
+				const sql = `UPDATE "${this.tableName}" SET "${currentData[1]}" = ? WHERE "${DefaultSettingValue}" = ?`;
+				sqlite3.prepare(sql).run([currentData[2], currentData[0]]);
 			});
-			SQLString += "COMMIT;";
-			sqlite3.exec(SQLString);
-		}
+		});
+		transaction(validData);
 	}
 };

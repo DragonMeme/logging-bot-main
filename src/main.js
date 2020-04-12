@@ -331,14 +331,14 @@ client.on("channelUpdate", async (oldChannel, newChannel) => {
 });
 
 /*
-    The bot that is invited to a guild must have more than 50 human members,
+    The bot that is invited to a guild must have more than 10 human members,
     or has the bot owner as the owner of the guild, otherwise bot leaves
     guild automatically.
 */
 client.on("guildCreate", async (guild) => {
 	const guildID = guild.id;
 	consoleLogTime(`Guild ID ${guildID} attempted to add bot to server.`);
-	if(guild.members.filter(member => !member.user.bot).size < 50){ // Do not add guild to database.
+	if(guild.members.filter(member => !member.user.bot).size < 10){ // Do not add guild to database.
 		if(!isGuildOwner(guild, "owner")) return guild.leave();
 	}
 	return createData([guildID]);
@@ -359,7 +359,7 @@ client.on("guildDelete", async (guild) => {
 	is also set accordingly.
 */
 client.on("userUpdate", async (oldUser, newUser) => {
-	if(newUser.id === client.user.id){
+	if(newUser.id === client.user.id){ // Ensure change presence status as client username changes.
 		if(oldUser.username !== newUser.username){
 			client.user.setPresence({
 				game: { name: `${prefix}help | @${newUser.username} help` }
@@ -373,8 +373,7 @@ client.on("userUpdate", async (oldUser, newUser) => {
 client.on("debug", async (info) => { // Censor bot token in debug logs.
 	if(info.includes(process.env.BOT_TOKEN)){
 		const botToken = process.env.BOT_TOKEN;
-		const censored = info.slice(info.indexOf(botToken)).replace(/./g, "*");
-		consoleLogTime(info.replace(botToken, censored));
+		consoleLogTime(info.replace(botToken, "*****"));
 	}else consoleLogTime(info);
 });
 client.on("disconnect", async () => consoleLogTime("==> I have disconnected!"));

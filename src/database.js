@@ -18,7 +18,7 @@ module.exports = {
 		client.guilds.forEach(
 			guild => {
 				const guildID = guild.id;
-				if(guild.members.filter(member => !member.user.bot).size < 50){
+				if(guild.members.filter(member => !member.user.bot).size < 10){
 					if(isGuildOwner(guild, "owner")) listGuildID.push(guildID);
 					else {
 						invalidGuildList.push(guildID);
@@ -35,10 +35,7 @@ module.exports = {
         */
 		consoleLogTime("=>  Attempting to add missing guilds to the database.");
 		const guildToAdd = [];
-		const currentGuildDB = [];
-		guildSettingTable.readDataBase().forEach(guildRow => {
-			currentGuildDB.push(guildRow[0]);
-		});
+		const currentGuildDB = guildSettingTable.readGuilds();
 		listGuildID.forEach(guild => {
 			if(!currentGuildDB.includes(guild)){
 				guildToAdd.push(guild);
@@ -54,8 +51,7 @@ module.exports = {
         */
 		consoleLogTime("=>  Removing any server information that the bot is currently not in from database.");
 		const databaseToRemove = [];
-		guildSettingTable.readDataBase().forEach(guild => {
-			const guildID = guild[0];
+		guildSettingTable.readGuilds().forEach(guildID => {
 			if(!listGuildID.includes(guildID)){
 				databaseToRemove.push(guildID);
 				consoleLogTime(`${DefaultSettingValue}: ${guildID} is queued for removal from the database.`);
