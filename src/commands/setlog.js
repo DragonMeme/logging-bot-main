@@ -34,19 +34,22 @@ module.exports = {
 				if(parameters.includes(activityType)){ // Check for valid input.
 					const setting = validParametersMap[parameters.indexOf(activityType)];
 					if(readData(guildID, setting) === channelID){ // Turn off activity type.
-						updateData(guildID, setting, null);
+						const inputData = [guildID, setting, null];
+						updateData([inputData]);
 						message.channel.send(`Activity Type \`${activityType}\` is now disabled!`);
 					}else{ // Turn on activity type, ensure bot can send embed to said channel.
 						if(message.channel.permissionsFor(message.guild.me).has("EMBED_LINKS")){
 							if(setting === "BD"){
 								if(message.channel.permissionsFor(message.guild.me).has("ATTACH_FILES")){
-									updateData(guildID, setting, channelID);
+									const inputData = [guildID, setting, channelID];
+									updateData([inputData]);
 									message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
 								}else{
 									message.reply("Please grant me permission `ATTACH_FILES` in this channel!");
 								}
 							}else{
-								updateData(guildID, setting, channelID);
+								const inputData = [guildID, setting, channelID];
+								updateData([inputData]);
 								message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
 							}
 						}else message.reply("Please grant me permission `EMBED_LINKS` in this channel!");
@@ -68,7 +71,8 @@ module.exports = {
 							message.reply("That activity type is already set to this channel!");
 						}else{ // Valid scenario as we are changing data, ensure bot can send embed to said channel.
 							if(message.channel.permissionsFor(message.guild.me).has("EMBED_LINKS")){
-								updateData(guildID, setting, channelID);
+								const inputData = [guildID, setting, channelID];
+								updateData([inputData]);
 								message.channel.send(`Activity Type \`${activityType}\` is now set to this channel!`);
 							}else message.reply("Please grant me permission `EMBED_LINKS` in this channel!");
 						}
@@ -76,7 +80,8 @@ module.exports = {
 						if(!readData(guildID, setting)){ // Invalid scenario.
 							message.reply("That activity type is already disabled!");
 						}else{ // Valid scenario as we are disabling this activity type.
-							updateData(guildID, setting, null);
+							const inputData = [guildID, setting, null];
+							updateData([inputData]);
 							message.channel.send(`Activity Type \`${activityType}\` is now disabled!`);
 						}
 					}else message.reply(`Invalid toogle value \`${toggle}\``);
