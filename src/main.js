@@ -134,6 +134,7 @@ client.on("messageDelete", async (message) => {
 	if(message.author.bot) return;
 	if(message.channel.type === "dm") return;
 	const targetChannelID = readData(message.guild.id, "UMD");
+	const updateObject = [[message.guild.id, "UMD", null]]; // Object to send to DB to on failure to log message_delete.
 	if(targetChannelID){
 		const targetChannel = message.guild.channels.get(targetChannelID);
 		const botPermissions = targetChannel.permissionsFor(message.guild.me);
@@ -148,14 +149,16 @@ client.on("messageDelete", async (message) => {
 					.setFooter(`Deleted Timestamp: ${getUTCTimeStamp(Date.now())}`);
 				targetChannel.send(embed);
 			}else{
-				updateData(message.guild.id, "UMD", null);
+				updateData(updateObject);
 				const messageString = "I require permission `EMBED_LINKS` to post `message_delete` logs." +
 					"I have disabled logging this for now, you will have to re-enable this setting.";
 				targetChannel.send(messageString);
 			}
 		}else{ // In the case the bot does not have permission to post in said channel.
-			updateData(message.guild.id, "UMD", null);
+			updateData(updateObject);
 		}
+	}else{ // Case channel does not exist.
+		updateData(updateObject);
 	}
 });
 
@@ -168,6 +171,7 @@ client.on("messageUpdate", async (oldMessage, newMessage) => {
 	if(oldMessage.author.bot) return;
 	if(oldMessage.channel.type === "dm") return;
 	const targetChannelID = readData(oldMessage.guild.id, "UME");
+	const updateObject = [[oldMessage.guild.id, "UME", null]]; // Object to send to DB on failure to log message_edit.
 	if(targetChannelID){
 		const targetChannel = newMessage.guild.channels.get(targetChannelID);
 		const botPermissions = targetChannel.permissionsFor(newMessage.guild.me);
@@ -185,14 +189,16 @@ client.on("messageUpdate", async (oldMessage, newMessage) => {
 					.setFooter(`Edited Timestamp: ${getUTCTimeStamp(newMessage.editedAt)}`);
 				targetChannel.send(embed);
 			}else{
-				updateData(newMessage.guild.id, "UMD", null);
+				updateData(updateObject);
 				const messageString = "I require permission `EMBED_LINKS` to post `message_edit` logs." +
 					"I have disabled logging this for now, you will have to re-enable this setting.";
 				targetChannel.send(messageString);
 			}
 		}else{ // In the case the bot does not have permission to post in said channel.
-			updateData(oldMessage.guild.id, "UME", null);
+			updateData(updateObject);
 		}
+	}else{
+		updateData(updateObject);
 	}
 });
 
@@ -209,6 +215,7 @@ client.on("messageDeleteBulk", async (messages) => {
 
 	const channelID = informationMessage.guild.id;
 	const targetChannel = informationMessage.guild.channels.get(targetChannelID);
+	const updateObject = [[guildID, "BD", null]]; // Object to send to DB on failure to log bulk_delete
 	if(targetChannel){ // Target channel exists
 		const botAsMember = informationMessage.guild.me;
 		const botPermissions = targetChannel.permissionsFor(botAsMember);
@@ -243,7 +250,7 @@ client.on("messageDeleteBulk", async (messages) => {
 					files: [new Attachment(textFilePath)]
 				});
 			}else{ // Missing either ATTACH_FILES and EMBED_LINKS permission for the bot to use logging channel.
-				updateData(guildID, "DB", null);
+				updateData(updateObject);
 				const messageString = "I require permission" + // At least one of the permissions are missing.
 					(currentPermissions.filter(p => !p).length === 1 ? "" : "s") + // Grammer for singular false permissions
 					(currentPermissions[0] ? " `EMBED_LINKS`" : " `ATTACH_FILES`") +
@@ -253,14 +260,14 @@ client.on("messageDeleteBulk", async (messages) => {
 				targetChannel.send(messageString);
 			}
 		}else{ // When bot is unable to send message to channel / view channel
-			updateData(guildID, "DB", null);
+			updateData(updateObject);
 			const errorMessage = `Cannot log \`bulk_delete\` logs to <#${targetChannelID}> as I do not have` +
 				"`SEND_MESSAGES` or `READ_MESSAGES` permissions.\n" +
 				"Please ask an administrator to re-setup for logging `bulk_delete` logs if needed.";
 			informationMessage.channel.send(errorMessage);
 		}
 	}else{ // When looging is deleted.
-		updateData(guildID, "BD", null);
+		updateData(updateObject);
 	}
 });
 
@@ -280,19 +287,18 @@ client.on("channelUpdate", async (oldChannel, newChannel) => {
 		const guildSettingRow = readDataRow(guildID);
 		const checkingChannelIDs = Object.values(guildSettingRow);
 		const channelIDToCheck = newChannel.id;
-
+		const updateObject = [];
 		if(checkingChannelIDs.includes(channelIDToCheck)){ // Ensure channel checked is used for logging.
-
 			// Only limit to logging channel ID of the channel that is being updated.
 			const checkingChannelKeys = keySettingValues.filter(key =>
-				guildSettingRow[SettingValues[key]] === channelIDToCheck
+				guildSettingRow[key] === channelIDToCheck
 			);
 			if(currentBotPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
 				if(currentBotPermissions.has("EMBED_LINKS")){ // Ensure can still send embeds.
 					// Check that the channel updated for logging bulk delete can still attach files.
 					if(checkingChannelKeys.includes("BD")){
 						if(!currentBotPermissions.has("ATTACH_FILES")){
-							updateData(guildID, "BD", null);
+							updateObject.push([guildID, "BD", null]); // Object to send to DB on failure to log bulk_delete
 							const messageString = "I am no longer able to log `bulk_delete`.\n" +
 								"I have automatically disabled logging `bulk_delete` for now!";
 							newChannel.send(messageString);
@@ -301,7 +307,7 @@ client.on("channelUpdate", async (oldChannel, newChannel) => {
 				}else{ // Can not send embed link to target channel but can send messages.
 					const indexKeys = []; // This should contain at least one value.
 					checkingChannelKeys.forEach(key => {
-						updateData(guildID, key, null);
+						updateObject.push([guildID, key, null]);
 						indexKeys.push(keySettingValues.indexOf(key));
 					});
 					const sizeKeysArray = indexKeys.length;
@@ -316,10 +322,11 @@ client.on("channelUpdate", async (oldChannel, newChannel) => {
 				}
 			}else{ // Can not send/read target channel.
 				checkingChannelKeys.forEach(key => {
-					updateData(guildID, key, null);
+					updateObject.push([guildID, key, null]);
 				});
 			}
 		}
+		if(updateObject.length > 0) updateData(updateObject);
 	}
 });
 
