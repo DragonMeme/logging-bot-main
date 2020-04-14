@@ -321,6 +321,51 @@ client.on("guildMemberRemove", async (member) => {
 });
 
 /*
+	When a user is banned.
+*/
+client.on("guildBanAdd", async (guild, user) => {
+	const targetChannelID = readData(guild.id, "UB");
+	if(!targetChannelID) return;
+	const targetChannel = guild.channels.get(targetChannelID);
+	const botPermissions = targetChannel.permissionsFor(guild.me);
+	const updateObject = [[guild.id, "UB", null]]; // Object to send to DB on failure to log user_left.
+	if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+		if(botPermissions.has("EMBED_LINKS")){
+			const embed = new RichEmbed()
+				.setTitle("🔨 **__User Banned__** 🔨")
+				.addField("User", `<@${user.id}>`)
+				.setFooter(`User (ID ${user.id}) banned at ${getUTCTimeStamp(Date.now())}`);
+			targetChannel.send(embed);
+		}else{ // When bot is unable to send message to channel / view channel
+			updateData(updateObject);
+			const messageString = "I require permission `EMBED_LINKS` to post `user_ban` logs. I have disabled logging `user_user_ban` for now.";
+			targetChannel.send(messageString);
+		}
+	}else updateData(updateObject);
+});
+
+client.on("guildBanRemove", async (guild, user) => {
+	const targetChannelID = readData(guild.id, "UB");
+	if(!targetChannelID) return;
+	const targetChannel = guild.channels.get(targetChannelID);
+	const botPermissions = targetChannel.permissionsFor(guild.me);
+	const updateObject = [[guild.id, "UB", null]]; // Object to send to DB on failure to log user_left.
+	if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
+		if(botPermissions.has("EMBED_LINKS")){
+			const embed = new RichEmbed()
+				.setTitle("🕳️ **__User Un-Banned__** 🕳️")
+				.addField("User", `<@${user.id}>`)
+				.setFooter(`User (ID ${user.id}) un-banned at ${getUTCTimeStamp(Date.now())}`);
+			targetChannel.send(embed);
+		}else{ // When bot is unable to send message to channel / view channel
+			updateData(updateObject);
+			const messageString = "I require permission `EMBED_LINKS` to post `user_ban` logs. I have disabled logging `user_user_ban` for now.";
+			targetChannel.send(messageString);
+		}
+	}else updateData(updateObject);
+});
+
+/*
 	During any channel update, assure that bot still has the permissions to post said logs.
 	Most of the worst case scenarios of logging channels are handled here.
 */
