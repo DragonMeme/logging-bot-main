@@ -5,8 +5,7 @@ const { RichEmbed } = require("discord.js");
 
 module.exports = {
 	name: "mute",
-	description: "Assigns a muted role to a user for a specific amount of time. " +
-		"Ideally the muted role ",
+	description: "Assigns a muted role to a user for a specific amount of time. Ideally the muted role ",
 	examples: ["mute @User 1d Trolling in channel.", "mute @user 30m Spamming ads."],
 	guildOnly: true,
 	permissionLevel: 1,
@@ -137,21 +136,21 @@ function applyMuteRoleTimer(message, member, timeInMs, reason){
 				updateData([[guild.id, "MR", role.id]]);
 			});
 
-		}else{ // Role
-			if(timeInMs < 259200000 && timeInMs > 60000){ // In range
+		}else{ // Role exists and assigned.
+			if(timeInMs <= 259200000 && timeInMs >= 60000){ // In range of 1 minute to 3 days.
 				const days = Math.floor(timeInMs / 86400000);
 				const hours = Math.floor(timeInMs / 3600000) % 24;
 				const minutes = Math.floor(timeInMs / 60000) % 60;
-				const timeString = `${days} day${days === 1 ? "" : "s"}, ${hours} hour${hours === 1 ? "" : "s"} and ${minutes} minute${minutes === 1 ? "" : "s"}`;
+				const timeString = `${days > 0 ? `${days} day${days === 1 ? "" : "s"}${minutes > 0 ? hours > 0 ? ", " : " and " : " and "}` : ""}${hours > 0 ? `${hours} hour${hours === 1 ? "" : "s"}${minutes > 0 ? ` and ${minutes} minute${minutes === 1 ? "" : "s"}` : ""}` : ""}`;
 				message.channel.send(`Muted <@${member.id}> for ${timeString}${reason ? ` with reason ${reason}` : "."}`).then(() => {
 					member.addRole(targetRoleID, reason);
 					sendLogs(message, timeString, member.id, reason);
 				});
 				setTimeout(() => { // Set a timer.
 					member.removeRole(targetRoleID, "Mute timer was up!").then(() => {
-						sendUnmutedLogs(message, member.id);
+						message.channel.send(`<@${member.id}> is now unmuted!`);
 					});
-					message.channel.send(`<@${member.id}> is now unmuted!`);
+					sendUnmutedLogs(message, member.id);
 				}, timeInMs);
 			}else{
 				if(timeInMs === 0){ // Input for timer is "i".
