@@ -69,7 +69,7 @@ function banMember(message, targetUserID, reason){
 	}
 	return message.client.fetchUser(targetUserID).then(user => { // Case user is not in guild.
 		message.channel.send(`<@${user.id}> has been banned!`);
-		guild.ban(user, {days: 7, reason: null});
+		guild.ban(user, {days: 7, reason: reason});
 	}).catch(() => {
 		message.reply("Sorry, I am unable to find that member.");
 	});
