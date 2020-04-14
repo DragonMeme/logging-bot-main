@@ -150,8 +150,7 @@ client.on("messageDelete", async (message) => {
 				targetChannel.send(embed);
 			}else{
 				updateData(updateObject);
-				const messageString = "I require permission `EMBED_LINKS` to post `message_delete` logs." +
-					"I have disabled logging this for now, you will have to re-enable this setting.";
+				const messageString = "I require permission `EMBED_LINKS` to post `message_delete` logs. I have disabled logging this for now, you will have to re-enable this setting.";
 				targetChannel.send(messageString);
 			}
 		}else{ // In the case the bot does not have permission to post in said channel.
@@ -190,8 +189,7 @@ client.on("messageUpdate", async (oldMessage, newMessage) => {
 				targetChannel.send(embed);
 			}else{
 				updateData(updateObject);
-				const messageString = "I require permission `EMBED_LINKS` to post `message_edit` logs." +
-					"I have disabled logging this for now, you will have to re-enable this setting.";
+				const messageString = "I require permission `EMBED_LINKS` to post `message_edit` logs. I have disabled logging this for now, you will have to re-enable this setting.";
 				targetChannel.send(messageString);
 			}
 		}else{ // In the case the bot does not have permission to post in said channel.
@@ -254,15 +252,12 @@ client.on("messageDeleteBulk", async (messages) => {
 					(currentPermissions.filter(p => !p).length === 1 ? "" : "s") + // Grammer for singular false permissions
 					(currentPermissions[0] ? " `EMBED_LINKS`" : " `ATTACH_FILES`") +
 					(currentPermissions[1] ? "" : " and `EMBED_LINKS`") +
-					" to post `bulk_delete` logs." +
-					"I have disabled logging this for now, you will have to re-enable this setting.";
+					" to post `bulk_delete` logs. I have disabled logging this for now, you will have to re-enable this setting.";
 				targetChannel.send(messageString);
 			}
 		}else{ // When bot is unable to send message to channel / view channel
 			updateData(updateObject);
-			const errorMessage = `Cannot log \`bulk_delete\` logs to <#${targetChannelID}> as I do not have` +
-				"`SEND_MESSAGES` or `READ_MESSAGES` permissions.\n" +
-				"Please ask an administrator to re-setup for logging `bulk_delete` logs if needed.";
+			const errorMessage = `Cannot log \`bulk_delete\` logs to <#${targetChannelID}> as I do not have \`SEND_MESSAGES\` or \`READ_MESSAGES\` permissions.\nPlease ask an administrator to re-setup for logging \`bulk_delete\` logs if needed.`;
 			informationMessage.channel.send(errorMessage);
 		}
 	}else{ // When looging is deleted.
@@ -281,7 +276,7 @@ client.on("guildMemberAdd", async (member) => {
 	if(!targetChannelID) return;
 	const targetChannel = guild.channels.get(targetChannelID);
 	const botPermissions = targetChannel.permissionsFor(guild.me);
-	const updateObject = [[guild.id, "UJ", null]]; // Object to send to DB on failure to log bulk_delete
+	const updateObject = [[guild.id, "UJ", null]]; // Object to send to DB on failure to log user_join.
 	if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
 		if(botPermissions.has("EMBED_LINKS")){
 			const embed = new RichEmbed()
@@ -291,8 +286,7 @@ client.on("guildMemberAdd", async (member) => {
 			targetChannel.send(embed);
 		}else{ // When bot is unable to send message to channel / view channel
 			updateData(updateObject);
-			const messageString = "I require permission `EMBED_LINKS` to post `user_join` logs." +
-				"I have disabled logging this for now, you will have to re-enable this setting.";
+			const messageString = "I require permission `EMBED_LINKS` to post `user_join` logs. I have disabled logging `user_leave` for now.";
 			targetChannel.send(messageString);
 		}
 	}else updateData(updateObject);
@@ -309,7 +303,7 @@ client.on("guildMemberRemove", async (member) => {
 	if(!targetChannelID) return;
 	const targetChannel = guild.channels.get(targetChannelID);
 	const botPermissions = targetChannel.permissionsFor(guild.me);
-	const updateObject = [[guild.id, "UL", null]]; // Object to send to DB on failure to log bulk_delete
+	const updateObject = [[guild.id, "UL", null]]; // Object to send to DB on failure to log user_left.
 	if(botPermissions.has(["VIEW_CHANNEL", "SEND_MESSAGES"])){
 		if(botPermissions.has("EMBED_LINKS")){
 			const embed = new RichEmbed()
@@ -320,8 +314,7 @@ client.on("guildMemberRemove", async (member) => {
 			targetChannel.send(embed);
 		}else{ // When bot is unable to send message to channel / view channel
 			updateData(updateObject);
-			const messageString = "I require permission `EMBED_LINKS` to post `user_leave` logs." +
-				"I have disabled logging this for now, you will have to re-enable this setting.";
+			const messageString = "I require permission `EMBED_LINKS` to post `user_leave` logs. I have disabled logging `user_leave` for now.";
 			targetChannel.send(messageString);
 		}
 	}else updateData(updateObject);
@@ -356,8 +349,7 @@ client.on("channelUpdate", async (oldChannel, newChannel) => {
 					if(checkingChannelKeys.includes("BD")){
 						if(!currentBotPermissions.has("ATTACH_FILES")){
 							updateObject.push([guildID, "BD", null]); // Object to send to DB on failure to log bulk_delete
-							const messageString = "I am no longer able to log `bulk_delete`.\n" +
-								"I have automatically disabled logging `bulk_delete` for now!";
+							const messageString = "I am no longer able to log `bulk_delete`.\nI have automatically disabled logging `bulk_delete` for now!";
 							newChannel.send(messageString);
 						}
 					}

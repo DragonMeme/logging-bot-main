@@ -13,8 +13,7 @@ module.exports = {
 	parameters: {
 		activityType: {
 			requirement: true,
-			description: "The type of activity the bot will log to. Acceptable values to be used in arguments include:"
-				+ `\n- \`${parameters.join("`\n- `")}\``
+			description: `The type of activity the bot will log to. Acceptable values to be used in arguments include:\n- \`${parameters.join("`\n- `")}\``
 		},
 		toogle: {
 			requirement: false,

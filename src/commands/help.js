@@ -10,17 +10,14 @@ module.exports = {
 	parameters: {
 		command: {
 			requirement: false,
-			description: "Supplies you the required information on a specific supported command. " +
-            `All supported commands can be checked by typing the command \`${process.env.PREFIX}help\`.`
+			description: `Supplies you the required information on a specific supported command. All supported commands can be checked by typing the command \`${process.env.PREFIX}help\`.`
 		}
 	},
 	execute(message, otherArguments){
 		switch(otherArguments.length){
 			case 0: // No supplied arguments.
 			{
-				let helpMessage = `**__${message.client.user.username} Help!__**\n`
-                + "Arguments closed with `[]` are optional.\nArguments closed with `<>` are required.\n"
-                + `Do not add \`[]\` and \`<>\` to your arguments (e.g. \`${process.env.PREFIX}help ping\`).\n\n`;
+				let helpMessage = `**__${message.client.user.username} Help!__**\nArguments closed with \`[]\` are optional.\nArguments closed with \`<>\` are required.\nDo not add \`[]\` and \`<>\` to your arguments (e.g. \`${process.env.PREFIX}help ping\`).\n\n`;
 
 				readdirSync("./src/commands/").filter(file => file.endsWith(".js")).forEach(
 					file => {

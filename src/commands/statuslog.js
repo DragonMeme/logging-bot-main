@@ -10,9 +10,7 @@ module.exports = {
 	parameters: {
 		category: {
 			requirement: false,
-			description: "Choose the category of which logging types to show. Possible values include:\n" +
-                `- \`${Object.keys(SettingTypesIndexes).join("`\n- `")}\`\n` +
-                "Note that if no argument is supplied, `all` is used by default."
+			description: `Choose the category of which logging types to show. Possible values include:\n- \`${Object.keys(SettingTypesIndexes).join("`\n- `")}\`\nNote that if no argument is supplied, \`all\` is used by default.`
 		}
 	},
 	execute(message, otherArguments){

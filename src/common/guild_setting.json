@@ -12,6 +12,7 @@
         "VJ":"Voice Chat Joins",
         "VL":"Voice Chat Leaves",
 
+        "UB":"User Bans",
         "UK":"User Kicked",
         "UM":"User Muted",
 
@@ -19,7 +20,7 @@
     },
     "SettingTypesIndexes" : {
         "all":{
-            "max":11,
+            "max":12,
             "min":0
         },
         "user":{
@@ -31,7 +32,7 @@
             "min":6
         },
         "mod":{
-            "max":11,
+            "max":12,
             "min":9
         }
     },
