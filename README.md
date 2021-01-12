@@ -1,5 +1,6 @@
 # logging_bot_main
 In this repository consists of my source code to hosting the bot. 
+**WARNING:** Discontinued due to Discord Intents and Outdated Discord.JS module. Updating Discord.JS required re-vamping code base.
 
 ## Before starting
 Pre-requisites:
