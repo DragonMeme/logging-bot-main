@@ -1,0 +1,35 @@
+{
+  "name": "log-bot",
+  "version": "1.0.0",
+  "description": "A logging discord bot.",
+  "main": "src/main.js",
+  "dependencies": {
+    "better-sqlite3": "^6.0.1",
+    "discord.js": "^11.6.4",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "mocha": "^7.0.0"
+  },
+  "scripts": {
+    "test": "mocha test/main.test.js --exit --timeout 10000",
+    "start": "node -r dotenv/config src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DragonMeme/logging-bot-main.git"
+  },
+  "keywords": [
+    "Javascript",
+    "Discord",
+    "Bot"
+  ],
+  "author": "DragonMeme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DragonMeme/logging-bot-main/issues"
+  },
+  "homepage": "https://github.com/DragonMeme/logging-bot-main#readme"
+}

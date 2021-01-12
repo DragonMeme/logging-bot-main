@@ -1,0 +1,41 @@
+{
+    "DefaultSettingValue" : "Guild ID",
+    "SettingValues" : {
+        "UJ":"User Joins",
+        "UL":"User Leaves",
+        "UMD":"User Message Deletes",
+        "UME":"User Message Edits",
+        "UNC":"User Nickname Changes",
+        "URA":"User Role Assigns",
+
+        "BD":"Bulk Deletes",
+        "VJ":"Voice Chat Joins",
+        "VL":"Voice Chat Leaves",
+
+        "UB":"User Bans",
+        "UK":"User Kicked"
+    },
+    "SettingTypesIndexes" : {
+        "all":{
+            "max":11,
+            "min":0
+        },
+        "user":{
+            "max":6,
+            "min":0
+        },
+        "channel":{
+            "max":9,
+            "min":6
+        },
+        "mod":{
+            "max":11,
+            "min":9
+        }
+    },
+    "StatusHeaders":{
+        "0":"User Activities",
+        "6":"Channel Activities",
+        "9":"Moderator Activities"
+    }
+}

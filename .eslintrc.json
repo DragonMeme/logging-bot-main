@@ -1,0 +1,199 @@
+{
+    "env": {
+        "commonjs": true,
+		"es6": true,
+		"mocha": true,
+        "node": true
+	},
+	
+    "extends": "eslint:recommended",
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+	},
+	
+    "parserOptions": {
+        "ecmaVersion": 2018
+	},
+	
+    "rules": {
+		"arrow-spacing": [
+			"error", 
+			{ 
+				"before": true, 
+				"after": true 
+			}
+		],
+
+		"brace-style": [
+			"error",
+			"1tbs",
+			{
+				"allowSingleLine": true
+			}
+		],
+
+		"camelcase": [
+			"error", 
+			{ 
+				"ignoreDestructuring": true, 
+				"ignoreImports": true, 
+				"allow": [
+					"Guild_Setting"
+				] 
+			}
+		],
+
+		"comma-spacing": [
+			"error"
+		],
+
+		"comma-style": [
+			"error"
+		],
+
+		"consistent-return": [
+			"error", 
+			{ 
+				"treatUndefinedAsUnspecified": true 
+			}
+		],
+
+		"curly": [
+			"error", 
+			"multi-line"
+		],
+
+		"dot-location": [
+			"error", 
+			"property"
+		],
+
+		"eol-last":[
+			"error"
+		],
+
+		"eqeqeq": [
+			"error"
+		],
+
+		"indent": [
+			"error",
+			"tab", 
+			{ 
+				"SwitchCase": 1 
+			}
+		],
+
+		"linebreak-style": [
+			"error",
+			"unix"
+		],
+
+		"max-statements-per-line": [
+			"error", 
+			{ 
+				"max": 1 
+			}
+		],
+
+		"no-case-declarations": [
+			"error"
+		],
+
+		"no-else-return": [
+			"error"
+		],
+
+		"no-empty-function": [
+			"error"
+		],
+
+		"no-extra-parens": [
+			"error"
+		],
+
+		"no-fallthrough": [
+			"error"
+		],
+
+		"no-multiple-empty-lines": [
+			"error",
+			{
+				"max": 1,
+				"maxEOF": 1
+			}
+		],
+
+		"no-trailing-spaces": [
+			"error"
+		],
+
+		"no-var": [
+			"error"
+		],
+
+		"prefer-const": [
+			"error"
+		],
+
+		"quotes": [
+			"error",
+			"double"
+		],
+
+		"semi": [
+			"error",
+			"always"
+		],
+
+		"space-before-blocks": [
+			"error", 
+			{ 
+				"functions":"never", 
+				"keywords": "never"
+			}
+		],
+
+		"space-before-function-paren": [
+			"error", 
+			{ 
+				"anonymous": "never", 
+				"named": "never", 
+				"asyncArrow": "always" 
+			}
+		],
+
+		"space-in-parens": [
+			"error"
+		],
+
+		"space-unary-ops": [
+			"error", 
+			{ 
+				"words": true, 
+				"nonwords": false 
+			}
+		],
+
+		"spaced-comment": [
+			"error"
+		],
+
+		"switch-colon-spacing": [
+			"error",
+			{ 
+				"after": false, 
+				"before": false 
+			}
+		],
+
+		"yoda": [
+			"error", 
+			"never", 
+			{ 
+				"onlyEquality": true 
+			}
+		]
+	}
+}
