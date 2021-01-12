@@ -18,7 +18,7 @@ module.exports = {
 		client.guilds.forEach(
 			guild => {
 				const guildID = guild.id;
-				if(guild.members.filter(member => !member.user.bot).size < 50){
+				if(guild.members.filter(member => !member.user.bot).size < 10){
 					if(isGuildOwner(guild, "owner")) listGuildID.push(guildID);
 					else {
 						invalidGuildList.push(guildID);
@@ -34,12 +34,15 @@ module.exports = {
             Add missing GuildID to database if needed.
         */
 		consoleLogTime("=>  Attempting to add missing guilds to the database.");
+		const guildToAdd = [];
+		const currentGuildDB = guildSettingTable.readGuilds();
 		listGuildID.forEach(guild => {
-			if(!guildSettingTable.readData(guild, "G")){
-				guildSettingTable.createData([guild]);
-				consoleLogTime(`${DefaultSettingValue}: ${guild} was not in database. It is now added!`);
+			if(!currentGuildDB.includes(guild)){
+				guildToAdd.push(guild);
+				consoleLogTime(`${DefaultSettingValue}: ${guild} was not in database. It is now queued!`);
 			}
 		});
+		if(guildToAdd.length > 0) guildSettingTable.createData(guildToAdd);
 		consoleLogTime("New servers successfully added to database.");
 
 		/*
@@ -47,18 +50,23 @@ module.exports = {
             This is used to save space.
         */
 		consoleLogTime("=>  Removing any server information that the bot is currently not in from database.");
-		guildSettingTable.readDataBase().forEach(guild => {
-			const guildID = guild[`${DefaultSettingValue}`];
+		const databaseToRemove = [];
+		guildSettingTable.readGuilds().forEach(guildID => {
 			if(!listGuildID.includes(guildID)){
-				guildSettingTable.deleteData([guildID]);
-				consoleLogTime(`${DefaultSettingValue}: ${guildID} is removed from the database.`);
+				databaseToRemove.push(guildID);
+				consoleLogTime(`${DefaultSettingValue}: ${guildID} is queued for removal from the database.`);
 			}
 		});
+		if(databaseToRemove > 0) guildSettingTable.deleteData(databaseToRemove);
 		consoleLogTime("Redundant guild information have been successfully pruned from database!");
 	},
 
 	invalidGuildList : function(){
 		return invalidGuildList.splice(0, invalidGuildList.length);
+	},
+
+	readDataRow : function(guildID){
+		return guildSettingTable.readDataRow(guildID);
 	},
 
 	// CRUD Commands.
@@ -70,8 +78,8 @@ module.exports = {
 		return guildSettingTable.readData(guildID, setting);
 	},
 
-	updateData : function(guildID, setting, data){
-		guildSettingTable.updateData(guildID, setting, data);
+	updateData : function(listData){
+		guildSettingTable.updateData(listData);
 	},
 
 	deleteData : function(listGuildID){

@@ -2,10 +2,10 @@ module.exports = {
 	name: "shutdown",
 	description: "Shuts down the bot.",
 	examples: ["shutdown"],
+	guildOnly: false,
 	permissionLevel: 3,
 	parameters: {},
 	execute(message, otherArguments){
-		if(!["text", "dm"].includes(message.channel.type)) return;
 		switch(otherArguments.length){
 			case 0:
 				message.channel.send("Shutting down!").then(

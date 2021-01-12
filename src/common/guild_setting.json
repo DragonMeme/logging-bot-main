@@ -12,10 +12,8 @@
         "VJ":"Voice Chat Joins",
         "VL":"Voice Chat Leaves",
 
-        "UK":"User Kicked",
-        "UM":"User Muted",
-
-        "MR":"Muted Role"
+        "UB":"User Bans",
+        "UK":"User Kicked"
     },
     "SettingTypesIndexes" : {
         "all":{

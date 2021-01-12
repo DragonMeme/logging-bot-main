@@ -114,3 +114,6 @@ dist
 # NPM related storage files not needed.
 package-lock*
 .npmrc
+
+# Template files not needed.
+tmp/

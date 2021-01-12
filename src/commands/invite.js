@@ -4,11 +4,11 @@ module.exports = {
 	name: "invite",
 	description: "DMs you a hyperlink to invite the bot.",
 	examples: ["invite"],
+	guildOnly: false,
 	permissionLevel: 0,
 	parameters: {},
 	execute(message, otherArguments){
 		const { invite } = require("../../data/config.json");
-		if(!["text", "dm"].includes(message.channel.type)) return;
 		switch(otherArguments.length){
 			case 0: // No other arguments needed.
 			{

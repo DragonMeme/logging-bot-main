@@ -5,17 +5,15 @@ module.exports = {
 	name: "statuslog",
 	description: "Prints which channel the specific activities are being logged to.",
 	examples: ["statuslog", "statuslog user"],
+	guildOnly: true,
 	permissionLevel: 2,
 	parameters: {
 		category: {
 			requirement: false,
-			description: "Choose the category of which logging types to show. Possible values include:\n" +
-                `- \`${Object.keys(SettingTypesIndexes).join("`\n- `")}\`\n` +
-                "Note that if no argument is supplied, `all` is used by default."
+			description: `Choose the category of which logging types to show. Possible values include:\n- \`${Object.keys(SettingTypesIndexes).join("`\n- `")}\`\nNote that if no argument is supplied, \`all\` is used by default.`
 		}
 	},
 	execute(message, otherArguments){
-		if(message.channel.type !== "text") return;
 		const guildID = message.guild.id;
 		switch(otherArguments.length){
 			case 0: // No other arguments needed.
@@ -27,12 +25,14 @@ module.exports = {
 			}
 
 			case 1: // One argument supplied.
+			{
 				if(Object.keys(SettingTypesIndexes).includes(otherArguments[0])){
 					const max = SettingTypesIndexes[otherArguments[0]].max;
 					const min = SettingTypesIndexes[otherArguments[0]].min;
 					message.channel.send(printStatusLog(max, min, guildID));
 				}else message.channel.send(`Invalid logging category \`${otherArguments[0]}\`!`);
 				break;
+			}
 
 			default:
 				message.channel.send("Too many arguments supplied.");
