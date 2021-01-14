@@ -4,8 +4,8 @@ In this repository consists of my source code to hosting the bot.
 **WARNING:** Discontinued due to Discord Intents and Outdated Discord.JS module. Updating Discord.JS required re-vamping code base.
 
 ## Before starting
-Pre-requisites:
-* A C/C++ Compiler.
+Pre-requisites (If trying to manually build):
+* A C/C++ Compiler (GCC/G++).
 * Python V3+
 * Node.js V12+
 
@@ -36,7 +36,7 @@ npm install
 npm start
 ```
 
-### Local Docker Container Method
+### Local Docker Container Method (Only docker needed to install for this to work)
 1.) Run this in your terminal to start making an image.
 ```bash
 docker build -t bot .
